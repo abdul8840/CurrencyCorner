@@ -101,14 +101,14 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function() {
   this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
   if (this.stock <= 0) {
     this.stockStatus = 'Out of Stock';
   } else {
     this.stockStatus = 'In Stock';
   }
-  next();
+  // next();
 });
 
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });

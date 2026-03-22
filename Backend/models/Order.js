@@ -108,14 +108,14 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-orderSchema.pre('save', function(next) {
+orderSchema.pre('save', function() {
   if (this.isNew) {
     const prefix = 'CC';
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.orderNumber = `${prefix}-${timestamp}-${random}`;
   }
-  next();
+  // next();
 });
 
 export default mongoose.model('Order', orderSchema);
