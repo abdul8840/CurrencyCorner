@@ -1,3 +1,4 @@
+// Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { FiHome, FiPackage, FiGrid, FiShoppingBag, FiTag, FiUsers, FiMail, FiX } from 'react-icons/fi';
 
@@ -21,21 +22,83 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {isOpen && <div onClick={onClose}></div>}
-      <aside>
-        <div>
-          <h1>Currency Corner</h1>
-          <p>Admin Panel</p>
-          <button onClick={onClose}><FiX /></button>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          onClick={onClose}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
+        ></div>
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 h-full w-64 bg-black text-white z-50
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static
+        border-r border-gray-800
+        flex flex-col
+      `}>
+        {/* Header */}
+        <div className="p-6 border-b border-gray-800 relative">
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            Currency Corner
+          </h1>
+          <p className="text-sm text-gray-400 mt-1 font-medium">Admin Panel</p>
+          
+          {/* Close button - mobile only */}
+          <button 
+            onClick={onClose}
+            className="lg:hidden absolute top-6 right-6 p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200 cursor-pointer"
+            aria-label="Close sidebar"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
         </div>
-        <nav>
-          {menuItems.map((item) => (
-            <Link key={item.path} to={item.path} onClick={onClose}>
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+          <ul className="space-y-1">
+            {menuItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  onClick={onClose}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-lg
+                    transition-all duration-200 cursor-pointer
+                    group relative overflow-hidden
+                    ${isActive(item.path)
+                      ? 'bg-white text-black font-medium shadow-lg'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <span className={`
+                    text-xl transition-transform duration-200
+                    ${isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'}
+                  `}>
+                    {item.icon}
+                  </span>
+                  <span className="font-medium">{item.label}</span>
+                  
+                  {/* Active indicator */}
+                  {isActive(item.path) && (
+                    <span className="absolute right-2 w-1.5 h-1.5 bg-black rounded-full"></span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-800">
+          <div className="px-4 py-3 bg-gray-900 rounded-lg">
+            <p className="text-xs text-gray-400">Version 1.0.0</p>
+            <p className="text-xs text-gray-500 mt-1">© 2024 Currency Corner</p>
+          </div>
+        </div>
       </aside>
     </>
   );
