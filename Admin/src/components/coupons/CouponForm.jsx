@@ -290,7 +290,3 @@ const CouponForm = ({ initialData, onSubmit, loading }) => {
 };
 
 export default CouponForm;
-
-// North Korea 5000 Won Banknote - UNC
-
-// North Korea 5000 Won Banknote Kim Il Sung.
