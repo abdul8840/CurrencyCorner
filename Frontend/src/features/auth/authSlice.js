@@ -105,7 +105,7 @@ const authSlice = createSlice({
     user: storedUser ? JSON.parse(storedUser) : null,
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
-    loading: false,
+    loading: true,
     error: null,
     message: null
   },
@@ -141,6 +141,10 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+        state.loading = false;
+      })
+      .addCase(loadUser.pending, (state) => {
+        state.loading = true;
       })
       .addCase(loadUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
@@ -173,7 +177,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(updateProfile.pending, (state) => { state.loading = true; })
+      .addCase(updateProfile.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
@@ -183,7 +187,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(updatePassword.pending, (state) => { state.loading = true; })
+      .addCase(updatePassword.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(updatePassword.fulfilled, (state, action) => {
         state.loading = false;
         state.message = action.payload.message;
@@ -192,7 +196,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(updateAvatar.pending, (state) => { state.loading = true; })
+      .addCase(updateAvatar.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(updateAvatar.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;

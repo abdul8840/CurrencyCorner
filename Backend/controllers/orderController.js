@@ -15,6 +15,12 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'You must accept terms and conditions' });
     }
 
+    if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.phone ||
+        !shippingAddress.addressLine1 || !shippingAddress.city ||
+        !shippingAddress.state || !shippingAddress.pincode) {
+      return res.status(400).json({ success: false, message: 'Complete shipping address is required' });
+    }
+
     const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty' });
@@ -26,10 +32,16 @@ export const createOrder = async (req, res) => {
     for (const item of cart.items) {
       const product = await Product.findById(item.product._id);
       if (!product || !product.isActive) {
-        return res.status(400).json({ success: false, message: `Product ${item.product.name} is no longer available` });
+        return res.status(400).json({
+          success: false,
+          message: `Product "${item.product.name}" is no longer available`
+        });
       }
       if (product.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}. Available: ${product.stock}` });
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for "${product.name}". Available: ${product.stock}`
+        });
       }
 
       orderItems.push({
@@ -68,7 +80,7 @@ export const createOrder = async (req, res) => {
     const shippingCharge = subtotal >= 500 ? 0 : 50;
     const totalAmount = subtotal - discount + shippingCharge;
 
-    const order = await Order.create({
+    const order = new Order({
       user: req.user._id,
       items: orderItems,
       shippingAddress,
@@ -82,15 +94,16 @@ export const createOrder = async (req, res) => {
       statusHistory: [{ status: 'Placed', note: 'Order placed by customer' }]
     });
 
+    await order.save();
+
     for (const item of orderItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity }
-      });
-      const updatedProduct = await Product.findById(item.product);
-      if (updatedProduct.stock <= 0) {
-        updatedProduct.stockStatus = 'Out of Stock';
-        await updatedProduct.save({ validateBeforeSave: false });
+      const product = await Product.findById(item.product);
+      product.stock -= item.quantity;
+      if (product.stock <= 0) {
+        product.stock = 0;
+        product.stockStatus = 'Out of Stock';
       }
+      await product.save({ validateBeforeSave: false });
     }
 
     cart.items = [];
@@ -103,10 +116,10 @@ export const createOrder = async (req, res) => {
       const invoiceBuffer = await invoiceService.generateInvoice(order, user);
       const invoiceResult = await invoiceService.uploadInvoiceToCloudinary(invoiceBuffer, order.orderNumber);
       order.invoice = invoiceResult;
-      await order.save();
+      await order.save({ validateBeforeSave: false });
       await emailService.sendOrderConfirmation(order, user, invoiceBuffer);
     } catch (invoiceError) {
-      console.error('Invoice generation error:', invoiceError);
+      console.error('Invoice/Email error:', invoiceError.message);
     }
 
     await order.populate('user', 'name email');
@@ -232,7 +245,7 @@ export const downloadInvoice = async (req, res) => {
     const invoiceBuffer = await invoiceService.generateInvoice(order, user);
     const invoiceResult = await invoiceService.uploadInvoiceToCloudinary(invoiceBuffer, order.orderNumber);
     order.invoice = invoiceResult;
-    await order.save();
+    await order.save({ validateBeforeSave: false });
 
     res.status(200).json({ success: true, invoiceUrl: invoiceResult.url });
   } catch (error) {
@@ -290,16 +303,20 @@ export const updateOrderStatus = async (req, res) => {
 
     if (trackingNumber) {
       order.trackingNumber = trackingNumber;
-      order.trackingUrl = trackingService.getIndiaPostTrackingUrl(trackingNumber);
+      order.trackingUrl = `https://www.indiapost.gov.in/_layouts/15/DOP.Portal.Tracking/TrackConsignment.aspx`;
     }
 
     if (adminNotes) order.adminNotes = adminNotes;
 
-    await order.save();
+    await order.save({ validateBeforeSave: false });
 
     const user = await User.findById(order.user);
     if (user) {
-      await emailService.sendOrderStatusUpdate(order, user);
+      try {
+        await emailService.sendOrderStatusUpdate(order, user);
+      } catch (emailErr) {
+        console.error('Status email error:', emailErr.message);
+      }
     }
 
     await order.populate('user', 'name email phone');

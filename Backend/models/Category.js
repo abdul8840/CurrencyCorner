@@ -34,8 +34,15 @@ const categorySchema = new mongoose.Schema({
 });
 
 categorySchema.pre('save', function() {
-  this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (this.isNew || this.isModified('name')) {
+    this.slug = this.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
   // next();
 });
+
+categorySchema.index({ slug: 1 });
 
 export default mongoose.model('Category', categorySchema);

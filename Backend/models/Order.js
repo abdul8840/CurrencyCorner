@@ -15,8 +15,7 @@ const orderItemSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -108,14 +107,20 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-orderSchema.pre('save', function() {
-  if (this.isNew) {
+orderSchema.pre('save', async function() {
+  if (this.isNew && !this.orderNumber) {
     const prefix = 'CC';
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    this.orderNumber = `${prefix}-${timestamp}-${random}`;
+    const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    const objectIdPart = this._id.toString().slice(-6).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+    this.orderNumber = `${prefix}${datePart}${objectIdPart}${randomPart}`;
   }
   // next();
 });
+
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ isViewed: 1 });
 
 export default mongoose.model('Order', orderSchema);

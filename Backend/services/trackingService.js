@@ -4,11 +4,13 @@ class TrackingService {
   }
 
   getTrackingInfo(trackingNumber) {
+    if (!trackingNumber) return null;
+
     return {
       trackingNumber,
       carrier: 'India Post',
       trackingUrl: this.getIndiaPostTrackingUrl(trackingNumber),
-      message: 'Please visit India Post website to track your shipment'
+      message: 'Please visit India Post website and enter your tracking number to track your shipment.'
     };
   }
 }

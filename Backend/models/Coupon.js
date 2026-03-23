@@ -65,15 +65,29 @@ const couponSchema = new mongoose.Schema({
 
 couponSchema.methods.isValid = function(userId, orderAmount) {
   const now = new Date();
-  if (!this.isActive) return { valid: false, message: 'Coupon is not active' };
-  if (now < this.startDate) return { valid: false, message: 'Coupon is not yet valid' };
-  if (now > this.endDate) return { valid: false, message: 'Coupon has expired' };
-  if (this.usageLimit && this.usedCount >= this.usageLimit) return { valid: false, message: 'Coupon usage limit reached' };
-  if (orderAmount < this.minOrderAmount) return { valid: false, message: `Minimum order amount is ₹${this.minOrderAmount}` };
 
-  if (userId) {
-    const userUsageCount = this.usedBy.filter(id => id.toString() === userId.toString()).length;
-    if (userUsageCount >= this.perUserLimit) return { valid: false, message: 'You have already used this coupon' };
+  if (!this.isActive) {
+    return { valid: false, message: 'Coupon is not active' };
+  }
+  if (now < this.startDate) {
+    return { valid: false, message: 'Coupon is not yet valid' };
+  }
+  if (now > this.endDate) {
+    return { valid: false, message: 'Coupon has expired' };
+  }
+  if (this.usageLimit !== null && this.usageLimit !== undefined && this.usedCount >= this.usageLimit) {
+    return { valid: false, message: 'Coupon usage limit reached' };
+  }
+  if (orderAmount < this.minOrderAmount) {
+    return { valid: false, message: `Minimum order amount is ₹${this.minOrderAmount}` };
+  }
+
+  if (userId && this.usedBy && this.usedBy.length > 0) {
+    const userIdStr = userId.toString();
+    const userUsageCount = this.usedBy.filter(id => id.toString() === userIdStr).length;
+    if (userUsageCount >= this.perUserLimit) {
+      return { valid: false, message: 'You have already used this coupon the maximum number of times' };
+    }
   }
 
   return { valid: true, message: 'Coupon is valid' };
@@ -81,16 +95,23 @@ couponSchema.methods.isValid = function(userId, orderAmount) {
 
 couponSchema.methods.calculateDiscount = function(orderAmount) {
   let discount = 0;
+
   if (this.type === 'percentage') {
     discount = (orderAmount * this.value) / 100;
     if (this.maxDiscount && discount > this.maxDiscount) {
       discount = this.maxDiscount;
     }
-  } else {
+  } else if (this.type === 'fixed') {
     discount = this.value;
   }
-  if (discount > orderAmount) discount = orderAmount;
+
+  if (discount > orderAmount) {
+    discount = orderAmount;
+  }
+
   return Math.round(discount * 100) / 100;
 };
+
+couponSchema.index({ code: 1 });
 
 export default mongoose.model('Coupon', couponSchema);
