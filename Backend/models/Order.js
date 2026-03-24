@@ -50,10 +50,23 @@ const orderSchema = new mongoose.Schema({
     required: true
   },
   coupon: {
-    code: String,
-    type: String,
-    value: Number,
-    discount: Number
+    code: {
+      type: String,
+      default: null
+    },
+    type: {
+      type: String,
+      enum: ['percentage', 'fixed'],
+      default: null
+    },
+    value: {
+      type: Number,
+      default: 0
+    },
+    discount: {
+      type: Number,
+      default: 0
+    }
   },
   paymentStatus: {
     type: String,
@@ -107,7 +120,7 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-orderSchema.pre('save', async function() {
+orderSchema.pre('save', async function () {
   if (this.isNew && !this.orderNumber) {
     const prefix = 'CC';
     const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
