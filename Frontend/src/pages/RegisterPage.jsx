@@ -217,7 +217,7 @@ const RegisterPage = () => {
               {/* Phone Field */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
-                  Phone Number <span className="text-text-light">(Optional)</span>
+                  Phone Number <span className="text-error">*</span>
                 </label>
                 <div className="relative">
                   <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />

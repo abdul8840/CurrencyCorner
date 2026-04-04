@@ -45,17 +45,31 @@ const ResetPasswordPage = () => {
     }
   }, [error, dispatch]);
 
+  // ✅ FIXED: Pass confirmPassword to dispatch
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!password || !confirmPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
+    
     if (password.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
     }
-    dispatch(resetPassword({ token, password }));
+    
+    // ✅ Dispatch with confirmPassword
+    dispatch(resetPassword({ 
+      token, 
+      password,
+      confirmPassword 
+    }));
   };
 
   const getPasswordStrength = (password) => {

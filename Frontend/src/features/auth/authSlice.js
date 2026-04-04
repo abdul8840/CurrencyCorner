@@ -8,7 +8,11 @@ export const register = createAsyncThunk('auth/register', async (data, { rejectW
     localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Registration failed');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Registration failed'
+    );
   }
 });
 
@@ -19,7 +23,11 @@ export const login = createAsyncThunk('auth/login', async (data, { rejectWithVal
     localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Login failed');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Login failed'
+    );
   }
 });
 
@@ -53,20 +61,51 @@ export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (dat
     const response = await authAPI.forgotPassword(data);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to send reset email');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Failed to send reset email'
+    );
   }
 });
 
-export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ token, password }, { rejectWithValue }) => {
-  try {
-    const response = await authAPI.resetPassword(token, { password });
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Password reset failed');
+// ✅ FIXED: Include confirmPassword in the request
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword', 
+  async ({ token, password, confirmPassword }, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.resetPassword(token, { 
+        password,
+        confirmPassword 
+      });
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.errors?.[0]?.message ||
+        error.response?.data?.message || 
+        'Password reset failed'
+      );
+    }
   }
-});
+);
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await userAPI.changePassword(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.errors?.[0]?.message ||
+        error.response?.data?.message || 
+        'Password change failed'
+      );
+    }
+  }
+);
 
 export const updateProfile = createAsyncThunk('auth/updateProfile', async (data, { rejectWithValue }) => {
   try {
@@ -74,7 +113,11 @@ export const updateProfile = createAsyncThunk('auth/updateProfile', async (data,
     localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Update failed');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Update failed'
+    );
   }
 });
 
@@ -83,7 +126,11 @@ export const updatePassword = createAsyncThunk('auth/updatePassword', async (dat
     const response = await userAPI.updatePassword(data);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Password update failed');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Password update failed'
+    );
   }
 });
 
@@ -93,7 +140,11 @@ export const updateAvatar = createAsyncThunk('auth/updateAvatar', async (formDat
     localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Avatar update failed');
+    return rejectWithValue(
+      error.response?.data?.errors?.[0]?.message ||
+      error.response?.data?.message || 
+      'Avatar update failed'
+    );
   }
 });
 
@@ -105,17 +156,25 @@ const authSlice = createSlice({
     user: storedUser ? JSON.parse(storedUser) : null,
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
-    loading: true,
+    loading: false,
     error: null,
-    message: null
+    message: null,
+    errors: []
   },
   reducers: {
-    clearError: (state) => { state.error = null; },
+    clearError: (state) => { 
+      state.error = null;
+      state.errors = [];
+    },
     clearMessage: (state) => { state.message = null; }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(register.pending, (state) => { state.loading = true; state.error = null; })
+      // Register
+      .addCase(register.pending, (state) => { 
+        state.loading = true; 
+        state.error = null; 
+      })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
@@ -126,7 +185,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(login.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Login
+      .addCase(login.pending, (state) => { 
+        state.loading = true; 
+        state.error = null; 
+      })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
@@ -137,12 +201,16 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      
+      // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
         state.loading = false;
       })
+      
+      // Load User
       .addCase(loadUser.pending, (state) => {
         state.loading = true;
       })
@@ -157,7 +225,12 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
       })
-      .addCase(forgotPassword.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Forgot Password
+      .addCase(forgotPassword.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
       .addCase(forgotPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.message = action.payload.message;
@@ -166,18 +239,44 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(resetPassword.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Reset Password
+      .addCase(resetPassword.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
       .addCase(resetPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
+        state.message = action.payload.message || 'Password reset successfully';
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.isAuthenticated = false;
       })
-      .addCase(updateProfile.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Change Password
+      .addCase(changePassword.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Update Profile
+      .addCase(updateProfile.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
@@ -187,7 +286,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(updatePassword.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Update Password
+      .addCase(updatePassword.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
       .addCase(updatePassword.fulfilled, (state, action) => {
         state.loading = false;
         state.message = action.payload.message;
@@ -196,7 +300,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(updateAvatar.pending, (state) => { state.loading = true; state.error = null; })
+      
+      // Update Avatar
+      .addCase(updateAvatar.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
       .addCase(updateAvatar.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
