@@ -77,7 +77,7 @@ export const createOrder = async (req, res) => {
       }
     }
 
-    const shippingCharge = subtotal >= 500 ? 0 : 50;
+    const shippingCharge = subtotal >= 1000 ? 0 : 80;
     const totalAmount = subtotal - discount + shippingCharge;
 
     const order = new Order({

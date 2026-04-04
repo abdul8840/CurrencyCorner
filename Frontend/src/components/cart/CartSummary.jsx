@@ -6,12 +6,12 @@ const CartSummary = ({ cart, discount, shippingCharge }) => {
   const shipping =
     shippingCharge !== undefined
       ? shippingCharge
-      : subtotal >= 500
+      : subtotal >= 1000
         ? 0
-        : 50;
+        : 80;
   const total = subtotal - (discount || 0) + shipping;
-  const freeShippingRemaining = 500 - subtotal;
-  const freeShippingProgress = Math.min((subtotal / 500) * 100, 100);
+  const freeShippingRemaining = 1000 - subtotal;
+  const freeShippingProgress = Math.min((subtotal / 1000) * 100, 100);
 
   return (
     <div
@@ -83,7 +83,7 @@ const CartSummary = ({ cart, discount, shippingCharge }) => {
         </div>
 
         {/* Free Shipping Progress */}
-        {subtotal < 500 && subtotal > 0 && (
+        {subtotal < 1000 && subtotal > 0 && (
           <div className="bg-bg-secondary rounded-xl p-3.5 border border-border-light">
             <div className="flex items-center gap-2 mb-2">
               <FiTruck className="text-primary text-sm flex-shrink-0" />
@@ -115,7 +115,7 @@ const CartSummary = ({ cart, discount, shippingCharge }) => {
         )}
 
         {/* Free shipping achieved message */}
-        {subtotal >= 500 && (
+        {subtotal >= 1000 && (
           <div className="bg-primary-50 rounded-xl p-3 border border-primary-200 flex items-center gap-2">
             <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
               <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

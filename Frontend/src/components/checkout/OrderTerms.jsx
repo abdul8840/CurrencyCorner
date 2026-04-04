@@ -33,7 +33,7 @@ const OrderTerms = ({ accepted, onAcceptChange }) => {
     },
     {
       icon: FiGift,
-      text: "Free shipping on orders above ₹500."
+      text: "Free shipping on orders above ₹1000."
     }
   ];
 
