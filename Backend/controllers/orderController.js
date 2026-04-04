@@ -117,9 +117,11 @@ export const createOrder = async (req, res) => {
       const invoiceResult = await invoiceService.uploadInvoiceToCloudinary(invoiceBuffer, order.orderNumber);
       order.invoice = invoiceResult;
       await order.save({ validateBeforeSave: false });
+      
+      // Send email using Brevo
       await emailService.sendOrderConfirmation(order, user, invoiceBuffer);
     } catch (invoiceError) {
-      console.error('Invoice/Email error:', invoiceError.message);
+      console.error('❌ Invoice/Email error:', invoiceError.message);
     }
 
     await order.populate('user', 'name email');
@@ -313,9 +315,10 @@ export const updateOrderStatus = async (req, res) => {
     const user = await User.findById(order.user);
     if (user) {
       try {
+        // Send email using Brevo
         await emailService.sendOrderStatusUpdate(order, user);
       } catch (emailErr) {
-        console.error('Status email error:', emailErr.message);
+        console.error('❌ Status email error:', emailErr.message);
       }
     }
 
