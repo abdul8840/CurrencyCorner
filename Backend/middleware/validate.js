@@ -617,3 +617,34 @@ export const validatePagination = [
 
   handleValidationErrors
 ];
+
+export const validateCampaign = [
+  body('title')
+    .trim()
+    .notEmpty().withMessage('Campaign title is required')
+    .isLength({ min: 3, max: 100 }).withMessage('Title must be 3-100 characters'),
+
+  body('description')
+    .trim()
+    .notEmpty().withMessage('Description is required')
+    .isLength({ min: 10, max: 2000 }).withMessage('Description must be 10-2000 characters'),
+
+  body('subject')
+    .trim()
+    .notEmpty().withMessage('Email subject is required')
+    .isLength({ max: 200 }).withMessage('Subject must not exceed 200 characters'),
+
+  body('type')
+    .isIn(['promotional', 'announcement', 'newsletter', 'product-showcase'])
+    .withMessage('Invalid campaign type'),
+
+  body('products')
+    .optional()
+    .isArray().withMessage('Products must be an array'),
+
+  body('targetSegment')
+    .isIn(['all', 'active', 'inactive', 'custom'])
+    .withMessage('Invalid target segment'),
+
+  handleValidationErrors
+];

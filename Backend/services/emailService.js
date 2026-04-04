@@ -50,7 +50,7 @@ class EmailService {
   }
 
 
-   async sendOrderConfirmation(order, user, invoiceBuffer) {
+  async sendOrderConfirmation(order, user, invoiceBuffer) {
     const attachments = [];
 
     if (invoiceBuffer) {
@@ -465,6 +465,90 @@ class EmailService {
       </body>
       </html>
     `;
+  }
+
+  async sendCampaignEmail(subscriber, campaign, products) {
+    try {
+      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+      sendSmtpEmail.to = [{ email: subscriber.email, name: subscriber.name }];
+      sendSmtpEmail.from = this.from;
+      sendSmtpEmail.subject = campaign.subject;
+      sendSmtpEmail.htmlContent = this.getCampaignHTML(campaign, products);
+
+      await apiInstance.sendTransacEmail(sendSmtpEmail);
+      console.log('✅ Campaign email sent to:', subscriber.email);
+    } catch (error) {
+      console.error('❌ Campaign email error:', error.message || error);
+      throw error;
+    }
+  }
+
+  getCampaignHTML(campaign, products) {
+    const productsHTML = products.slice(0, 6).map(product => `
+    <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+      <a href="${process.env.FRONTEND_URL}/product/${product._id}" style="text-decoration: none; color: #333;">
+        <div style="height: 200px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; overflow: hidden;">
+          ${product.images?.length > 0 ? `<img src="${product.images[0].url}" style="width: 100%; height: 100%; object-fit: cover;" />` : ''}
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #333;">${product.name}</h3>
+        <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; line-height: 1.4;">${product.description?.substring(0, 100)}...</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 18px; font-weight: bold; color: #2c3e50;">Rs. ${product.price}</span>
+          <button style="background: #2c3e50; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">View Details</button>
+        </div>
+      </a>
+    </div>
+  `).join('');
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px; }
+        .content { padding: 30px 0; }
+        .products { display: grid; gap: 15px; }
+        .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; border-top: 1px solid #eee; }
+        .cta-button { display: inline-block; background: #2c3e50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin: 0 0 10px 0;">${campaign.title}</h1>
+          <p style="margin: 0; opacity: 0.9;">${campaign.description}</p>
+        </div>
+
+        ${campaign.bannerImage?.url ? `
+          <div style="margin: 20px 0;">
+            <img src="${campaign.bannerImage.url}" style="width: 100%; height: auto; border-radius: 8px;" />
+          </div>
+        ` : ''}
+
+        <div class="content">
+          <h2 style="color: #2c3e50; margin-bottom: 20px;">Featured Products</h2>
+          <div class="products">
+            ${productsHTML}
+          </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.FRONTEND_URL}/shop" class="cta-button">View All Products</a>
+        </div>
+
+        <div class="footer">
+          <p>You received this email because you subscribed to our newsletter.</p>
+          <a href="${process.env.FRONTEND_URL}/unsubscribe?email=${subscriber.email}" style="color: #999; text-decoration: none;">Unsubscribe</a> | 
+          <a href="${process.env.FRONTEND_URL}/newsletter-preferences?email=${subscriber.email}" style="color: #999; text-decoration: none;">Update Preferences</a>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
   }
 }
 
