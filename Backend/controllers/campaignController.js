@@ -4,8 +4,26 @@ import NewsletterSubscriber from '../models/NewsletterSubscriber.js';
 import CampaignLog from '../models/CampaignLog.js';
 import Product from '../models/Product.js';
 import emailService from '../services/emailService.js';
-import cloudinary from 'cloudinary';
-import fs from 'fs';
+import cloudinary from '../config/cloudinary.js';
+import { Readable } from 'stream';
+
+// Helper function to upload buffer to cloudinary
+const uploadToCloudinary = (buffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: folder, resource_type: 'auto' },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    
+    const readableStream = new Readable();
+    readableStream.push(buffer);
+    readableStream.push(null);
+    readableStream.pipe(uploadStream);
+  });
+};
 
 // ==================== GET CAMPAIGNS ====================
 
@@ -76,7 +94,30 @@ export const getCampaignById = async (req, res) => {
 
 export const createCampaign = async (req, res) => {
   try {
-    const { title, description, subject, type, products, sendImmediately, scheduleDate, targetSegment, customEmails } = req.body;
+    const { title, description, subject, type, sendImmediately, scheduleDate, targetSegment, customEmails } = req.body;
+    
+    // Parse products if it's a string (from FormData)
+    let products = req.body.products;
+    if (typeof products === 'string') {
+      try {
+        products = JSON.parse(products);
+      } catch (e) {
+        products = [];
+      }
+    }
+    
+    // Parse customEmails if it's a string
+    let parsedCustomEmails = customEmails;
+    if (typeof customEmails === 'string') {
+      try {
+        parsedCustomEmails = JSON.parse(customEmails);
+      } catch (e) {
+        parsedCustomEmails = [];
+      }
+    }
+
+    // Convert sendImmediately to boolean
+    const isSendImmediately = sendImmediately === 'true' || sendImmediately === true;
 
     if (!title || !description || !subject) {
       return res.status(400).json({
@@ -86,13 +127,19 @@ export const createCampaign = async (req, res) => {
     }
 
     let bannerImage = {};
+    
+    // Handle file upload to Cloudinary
     if (req.file) {
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: 'campaigns/banners',
-        resource_type: 'auto'
-      });
-      bannerImage = { url: result.url, publicId: result.public_id };
-      fs.unlinkSync(req.file.path);
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, 'campaigns/banners');
+        bannerImage = { url: result.secure_url, publicId: result.public_id };
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to upload banner image: ' + uploadError.message
+        });
+      }
     }
 
     const campaign = new Campaign({
@@ -102,21 +149,23 @@ export const createCampaign = async (req, res) => {
       type,
       products: products || [],
       bannerImage,
-      sendImmediately,
-      scheduleDate: !sendImmediately ? scheduleDate : null,
-      status: sendImmediately ? 'sending' : 'scheduled',
+      sendImmediately: isSendImmediately,
+      scheduleDate: isSendImmediately ? null : scheduleDate,
+      status: isSendImmediately ? 'sending' : 'scheduled',
       targetSegment,
-      customEmails: customEmails || [],
+      customEmails: parsedCustomEmails || [],
       createdBy: req.user._id
     });
 
     await campaign.save();
     await campaign.populate('products.product');
 
-    // If send immediately, start sending
-    if (sendImmediately) {
-      sendCampaignEmails(campaign);
-    } else {
+    // If send immediately, start sending (don't await - do in background)
+    if (isSendImmediately) {
+      sendCampaignEmails(campaign).catch(error => {
+        console.error('Background email sending error:', error);
+      });
+    } else if (scheduleDate) {
       // Schedule for later
       scheduleEmailSending(campaign);
     }
@@ -124,10 +173,10 @@ export const createCampaign = async (req, res) => {
     res.status(201).json({
       success: true,
       campaign,
-      message: 'Campaign created successfully'
+      message: isSendImmediately ? 'Campaign created and sending started' : 'Campaign scheduled successfully'
     });
   } catch (error) {
-    if (req.file) fs.unlinkSync(req.file.path);
+    console.error('Create campaign error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -149,7 +198,27 @@ export const updateCampaign = async (req, res) => {
       });
     }
 
-    const { title, description, subject, type, products, targetSegment, customEmails } = req.body;
+    const { title, description, subject, type, targetSegment, customEmails } = req.body;
+    
+    // Parse products if it's a string (from FormData)
+    let products = req.body.products;
+    if (typeof products === 'string') {
+      try {
+        products = JSON.parse(products);
+      } catch (e) {
+        products = campaign.products;
+      }
+    }
+    
+    // Parse customEmails if it's a string
+    let parsedCustomEmails = customEmails;
+    if (typeof customEmails === 'string') {
+      try {
+        parsedCustomEmails = JSON.parse(customEmails);
+      } catch (e) {
+        parsedCustomEmails = campaign.customEmails;
+      }
+    }
 
     if (title) campaign.title = title;
     if (description) campaign.description = description;
@@ -157,17 +226,25 @@ export const updateCampaign = async (req, res) => {
     if (type) campaign.type = type;
     if (products) campaign.products = products;
     if (targetSegment) campaign.targetSegment = targetSegment;
-    if (customEmails) campaign.customEmails = customEmails;
+    if (parsedCustomEmails) campaign.customEmails = parsedCustomEmails;
 
+    // Handle file upload to Cloudinary
     if (req.file) {
-      if (campaign.bannerImage?.publicId) {
-        await cloudinary.v2.uploader.destroy(campaign.bannerImage.publicId);
+      try {
+        // Delete old image if exists
+        if (campaign.bannerImage?.publicId) {
+          await cloudinary.uploader.destroy(campaign.bannerImage.publicId);
+        }
+        
+        const result = await uploadToCloudinary(req.file.buffer, 'campaigns/banners');
+        campaign.bannerImage = { url: result.secure_url, publicId: result.public_id };
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to upload banner image: ' + uploadError.message
+        });
       }
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: 'campaigns/banners'
-      });
-      campaign.bannerImage = { url: result.url, publicId: result.public_id };
-      fs.unlinkSync(req.file.path);
     }
 
     await campaign.save();
@@ -179,7 +256,7 @@ export const updateCampaign = async (req, res) => {
       message: 'Campaign updated successfully'
     });
   } catch (error) {
-    if (req.file) fs.unlinkSync(req.file.path);
+    console.error('Update campaign error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -201,8 +278,13 @@ export const deleteCampaign = async (req, res) => {
       });
     }
 
+    // Delete image from Cloudinary if exists
     if (campaign.bannerImage?.publicId) {
-      await cloudinary.v2.uploader.destroy(campaign.bannerImage.publicId);
+      try {
+        await cloudinary.uploader.destroy(campaign.bannerImage.publicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary delete error:', cloudinaryError);
+      }
     }
 
     await Campaign.findByIdAndDelete(req.params.id);
@@ -213,14 +295,17 @@ export const deleteCampaign = async (req, res) => {
       message: 'Campaign deleted successfully'
     });
   } catch (error) {
+    console.error('Delete campaign error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ==================== SEND CAMPAIGN ====================
+// ==================== SEND CAMPAIGN EMAILS ====================
 
 const sendCampaignEmails = async (campaign) => {
   try {
+    console.log(`🚀 Starting campaign "${campaign.title}"...`);
+    
     let subscribers = [];
 
     if (campaign.targetSegment === 'all') {
@@ -233,15 +318,41 @@ const sendCampaignEmails = async (campaign) => {
       subscribers = await NewsletterSubscriber.find({ email: { $in: campaign.customEmails } });
     }
 
+    if (subscribers.length === 0) {
+      console.log(`⚠️ No subscribers found for campaign "${campaign.title}"`);
+      campaign.status = 'cancelled';
+      campaign.recipients = 0;
+      await campaign.save();
+      return;
+    }
+
     campaign.recipients = subscribers.length;
     campaign.status = 'sending';
     await campaign.save();
 
-    // Get products for email
-    const products = await Product.find({ _id: { $in: campaign.products.map(p => p.product) } });
+    console.log(`📧 Found ${subscribers.length} subscribers for campaign`);
 
-    for (const subscriber of subscribers) {
+    // Get products for email
+    const productIds = campaign.products.map(p => p.product);
+    const products = await Product.find({ _id: { $in: productIds } });
+    console.log(`📦 Found ${products.length} products for campaign`);
+
+    let sentCount = 0;
+    let failedCount = 0;
+    
+    for (let i = 0; i < subscribers.length; i++) {
+      const subscriber = subscribers[i];
+      
       try {
+        // Validate subscriber
+        if (!subscriber || !subscriber.email) {
+          console.error(`❌ Invalid subscriber at index ${i}:`, subscriber);
+          failedCount++;
+          continue;
+        }
+
+        console.log(`📧 [${i + 1}/${subscribers.length}] Sending to: ${subscriber.email}`);
+
         // Create campaign log
         const log = new CampaignLog({
           campaign: campaign._id,
@@ -252,43 +363,65 @@ const sendCampaignEmails = async (campaign) => {
         await log.save();
 
         // Send email
-        await emailService.sendCampaignEmail(
-          subscriber,
-          campaign,
-          products
-        );
+        await emailService.sendCampaignEmail(subscriber, campaign, products);
 
         // Update log
         log.status = 'sent';
         log.sentAt = new Date();
         await log.save();
 
-        // Update campaign
-        campaign.sent += 1;
+        sentCount++;
+        campaign.sent = sentCount;
+        await campaign.save();
+        
+        console.log(`✅ [${i + 1}/${subscribers.length}] Sent to ${subscriber.email}`);
+        
+        // Add a small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
       } catch (error) {
-        console.error(`Failed to send to ${subscriber.email}:`, error);
-        await CampaignLog.updateOne(
-          { campaign: campaign._id, subscriber: subscriber._id },
-          { status: 'failed', failureReason: error.message }
-        );
+        console.error(`❌ Failed to send to ${subscriber?.email || 'unknown'}:`, error.message);
+        failedCount++;
+        
+        try {
+          await CampaignLog.updateOne(
+            { campaign: campaign._id, subscriber: subscriber?._id },
+            { status: 'failed', failureReason: error.message }
+          );
+        } catch (logError) {
+          console.error('Failed to update campaign log:', logError);
+        }
       }
     }
 
     campaign.status = 'sent';
     await campaign.save();
+    
+    console.log(`✅ Campaign "${campaign.title}" completed. Sent: ${sentCount}/${subscribers.length}, Failed: ${failedCount}`);
+    
   } catch (error) {
-    console.error('Campaign send error:', error);
-    campaign.status = 'cancelled';
-    await campaign.save();
+    console.error('❌ Campaign send error:', error);
+    try {
+      campaign.status = 'cancelled';
+      await campaign.save();
+    } catch (saveError) {
+      console.error('Failed to update campaign status:', saveError);
+    }
   }
 };
 
 const scheduleEmailSending = (campaign) => {
-  const delay = campaign.scheduleDate.getTime() - Date.now();
+  const scheduleDate = new Date(campaign.scheduleDate);
+  const delay = scheduleDate.getTime() - Date.now();
+  
   if (delay > 0) {
+    console.log(`📅 Campaign "${campaign.title}" scheduled for ${scheduleDate.toLocaleString()}`);
     setTimeout(() => {
       sendCampaignEmails(campaign);
     }, delay);
+  } else if (delay <= 0 && campaign.status === 'scheduled') {
+    console.log(`⏰ Schedule date passed for "${campaign.title}", sending immediately`);
+    sendCampaignEmails(campaign);
   }
 };
 
@@ -300,11 +433,11 @@ export const getCampaignStats = async (req, res) => {
 
     const stats = {
       totalCampaigns: campaigns.length,
-      totalSent: campaigns.reduce((sum, c) => sum + c.sent, 0),
-      totalOpened: campaigns.reduce((sum, c) => sum + c.opened, 0),
-      totalClicked: campaigns.reduce((sum, c) => sum + c.clicked, 0),
+      totalSent: campaigns.reduce((sum, c) => sum + (c.sent || 0), 0),
+      totalOpened: campaigns.reduce((sum, c) => sum + (c.opened || 0), 0),
+      totalClicked: campaigns.reduce((sum, c) => sum + (c.clicked || 0), 0),
       averageOpenRate: campaigns.length > 0
-        ? (campaigns.reduce((sum, c) => sum + (c.sent > 0 ? c.opened / c.sent : 0), 0) / campaigns.length * 100).toFixed(2)
+        ? (campaigns.reduce((sum, c) => sum + (c.sent > 0 ? (c.opened / c.sent) : 0), 0) / campaigns.length * 100).toFixed(2)
         : 0,
       campaignsByStatus: {
         draft: campaigns.filter(c => c.status === 'draft').length,
@@ -315,6 +448,7 @@ export const getCampaignStats = async (req, res) => {
 
     res.status(200).json({ success: true, stats });
   } catch (error) {
+    console.error('Get campaign stats error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -344,6 +478,7 @@ export const cancelCampaign = async (req, res) => {
       message: 'Campaign cancelled successfully'
     });
   } catch (error) {
+    console.error('Cancel campaign error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

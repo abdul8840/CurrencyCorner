@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' }
 });
@@ -88,6 +88,31 @@ export const contactAPI = {
   getAll: (params) => API.get('/contact', { params }),
   updateStatus: (id, data) => API.put(`/contact/${id}`, data),
   delete: (id) => API.delete(`/contact/${id}`)
+};
+
+export const subscriberAPI = {
+  getAll: (params) => API.get('/subscribers', { params }),
+  getStats: () => API.get('/subscribers/stats'),
+  add: (data) => API.post('/subscribers', data),
+  import: (formData) => API.post('/subscribers/import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => API.delete(`/subscribers/${id}`),
+  export: (status) => API.get(`/subscribers/export/csv?status=${status}`, { responseType: 'blob' })
+};
+
+export const campaignAPI = {
+  getAll: (params) => API.get('/campaigns', { params }),
+  getById: (id) => API.get(`/campaigns/${id}`),
+  getStats: () => API.get('/campaigns/stats'),
+  create: (formData) => API.post('/campaigns', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, formData) => API.put(`/campaigns/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => API.delete(`/campaigns/${id}`),
+  cancel: (id) => API.put(`/campaigns/${id}/cancel`)
 };
 
 export default API;

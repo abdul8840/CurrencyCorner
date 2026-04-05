@@ -3,34 +3,37 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log('Brevo API Key status:', process.env.BREVO_API_KEY ? '✅ Set' : '❌ Missing');
+
 // Configure Brevo API
-const client = SibApiV3Sdk.ApiClient.instance;
-client.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+console.log('✅ Brevo API configured successfully');
 
 class EmailService {
   constructor() {
     this.sender = {
-      email: process.env.BREVO_FROM_EMAIL,
-      name: process.env.BREVO_FROM_NAME
+      email: process.env.BREVO_FROM_EMAIL || 'noreply@yourdomain.com',
+      name: process.env.BREVO_FROM_NAME || 'Your Store'
     };
+    this.apiInstance = apiInstance; // Store the api instance
   }
 
   async sendEmail({ to, subject, html, attachment = [] }) {
     try {
       const email = new SibApiV3Sdk.SendSmtpEmail();
 
-      // ✅ CRITICAL FIX
       email.sender = this.sender;
-
       email.to = [
         {
           email: to.email,
           name: to.name || "User"
         }
       ];
-
       email.subject = subject;
       email.htmlContent = html;
 
@@ -38,17 +41,14 @@ class EmailService {
         email.attachment = attachment;
       }
 
-      const response = await apiInstance.sendTransacEmail(email);
-
+      const response = await this.apiInstance.sendTransacEmail(email);
       console.log("✅ Email sent:", response.messageId || "Success");
       return response;
-
     } catch (error) {
       console.error("❌ FULL BREVO ERROR:", error.response?.body || error.message);
       throw error;
     }
   }
-
 
   async sendOrderConfirmation(order, user, invoiceBuffer) {
     const attachments = [];
@@ -69,7 +69,6 @@ class EmailService {
     });
   }
 
-  // ================= PASSWORD RESET =================
   async sendPasswordResetEmail(user, resetUrl) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
@@ -78,7 +77,6 @@ class EmailService {
     });
   }
 
-  // ================= ORDER STATUS =================
   async sendOrderStatusUpdate(order, user) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
@@ -87,7 +85,6 @@ class EmailService {
     });
   }
 
-  // ================= WELCOME =================
   async sendWelcomeEmail(user) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
@@ -96,7 +93,6 @@ class EmailService {
     });
   }
 
-  // ================= CONTACT =================
   async sendContactFormEmail(contactData) {
     return this.sendEmail({
       to: { email: process.env.BREVO_FROM_EMAIL },
@@ -105,6 +101,42 @@ class EmailService {
     });
   }
 
+  async sendCampaignEmail(subscriber, campaign, products) {
+    try {
+      // Validate required parameters
+      if (!subscriber || !subscriber.email) {
+        throw new Error('Invalid subscriber data: email is required');
+      }
+      
+      if (!campaign) {
+        throw new Error('Invalid campaign data');
+      }
+
+      if (!this.apiInstance) {
+        throw new Error('Brevo API not initialized');
+      }
+
+      console.log(`📧 Preparing to send email to: ${subscriber.email}`);
+      console.log(`📧 Campaign subject: ${campaign.subject}`);
+
+      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+      sendSmtpEmail.sender = this.sender;
+      sendSmtpEmail.to = [{ 
+        email: subscriber.email, 
+        name: subscriber.name || 'Valued Customer' 
+      }];
+      sendSmtpEmail.subject = campaign.subject;
+      sendSmtpEmail.htmlContent = this.getCampaignHTML(subscriber, campaign, products || []);
+
+      const response = await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+      console.log(`✅ Campaign email sent successfully to: ${subscriber.email}`);
+      return response;
+    } catch (error) {
+      console.error('❌ Campaign email error:', error.message || error);
+      throw error;
+    }
+  }
 
   getOrderConfirmationHTML(order, user) {
     const itemsHTML = order.items
@@ -115,7 +147,7 @@ class EmailService {
         <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
         <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rs. ${item.price}</td>
         <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rs. ${item.price * item.quantity}</td>
-      </tr>`
+       </tr>`
       )
       .join('');
 
@@ -467,88 +499,98 @@ class EmailService {
     `;
   }
 
-  async sendCampaignEmail(subscriber, campaign, products) {
-    try {
-      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  getCampaignHTML(subscriber, campaign, products) {
+    const productList = Array.isArray(products) ? products : [];
+    
+    const productsHTML = productList.slice(0, 6).map(product => `
+      <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+        <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${product._id}" style="text-decoration: none; color: #333;">
+          <div style="height: 200px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; overflow: hidden;">
+            ${product.images && product.images.length > 0 && product.images[0].url 
+              ? `<img src="${product.images[0].url}" style="width: 100%; height: 100%; object-fit: cover;" />` 
+              : '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e0e0e0; color: #999;">No Image</div>'}
+          </div>
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #333;">${this.escapeHtml(product.name || 'Product')}</h3>
+          <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; line-height: 1.4;">${this.escapeHtml((product.description || '').substring(0, 100))}...</p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 18px; font-weight: bold; color: #2c3e50;">Rs. ${product.price || 0}</span>
+            <span style="background: #2c3e50; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; display: inline-block;">View Details</span>
+          </div>
+        </a>
+      </div>
+    `).join('');
 
-      sendSmtpEmail.to = [{ email: subscriber.email, name: subscriber.name }];
-      sendSmtpEmail.from = this.from;
-      sendSmtpEmail.subject = campaign.subject;
-      sendSmtpEmail.htmlContent = this.getCampaignHTML(campaign, products);
-
-      await apiInstance.sendTransacEmail(sendSmtpEmail);
-      console.log('✅ Campaign email sent to:', subscriber.email);
-    } catch (error) {
-      console.error('❌ Campaign email error:', error.message || error);
-      throw error;
-    }
-  }
-
-  getCampaignHTML(campaign, products) {
-    const productsHTML = products.slice(0, 6).map(product => `
-    <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
-      <a href="${process.env.FRONTEND_URL}/product/${product._id}" style="text-decoration: none; color: #333;">
-        <div style="height: 200px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; overflow: hidden;">
-          ${product.images?.length > 0 ? `<img src="${product.images[0].url}" style="width: 100%; height: 100%; object-fit: cover;" />` : ''}
-        </div>
-        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #333;">${product.name}</h3>
-        <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; line-height: 1.4;">${product.description?.substring(0, 100)}...</p>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 18px; font-weight: bold; color: #2c3e50;">Rs. ${product.price}</span>
-          <button style="background: #2c3e50; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">View Details</button>
-        </div>
-      </a>
-    </div>
-  `).join('');
+    const unsubscribeLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe?email=${encodeURIComponent(subscriber.email)}`;
+    const preferencesLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/newsletter-preferences?email=${encodeURIComponent(subscriber.email)}`;
 
     return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px; }
-        .content { padding: 30px 0; }
-        .products { display: grid; gap: 15px; }
-        .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; border-top: 1px solid #eee; }
-        .cta-button { display: inline-block; background: #2c3e50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1 style="margin: 0 0 10px 0;">${campaign.title}</h1>
-          <p style="margin: 0; opacity: 0.9;">${campaign.description}</p>
-        </div>
-
-        ${campaign.bannerImage?.url ? `
-          <div style="margin: 20px 0;">
-            <img src="${campaign.bannerImage.url}" style="width: 100%; height: auto; border-radius: 8px;" />
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${this.escapeHtml(campaign.title)}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; background: white; }
+          .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { padding: 30px 0; }
+          .products { display: grid; gap: 15px; }
+          .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; border-top: 1px solid #eee; margin-top: 30px; }
+          .cta-button { display: inline-block; background: #2c3e50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+          .cta-button:hover { background: #1a252f; }
+          @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .products { grid-template-columns: 1fr !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0 0 10px 0; font-size: 28px;">${this.escapeHtml(campaign.title)}</h1>
+            <p style="margin: 0; opacity: 0.9; font-size: 16px;">${this.escapeHtml(campaign.description)}</p>
           </div>
-        ` : ''}
 
-        <div class="content">
-          <h2 style="color: #2c3e50; margin-bottom: 20px;">Featured Products</h2>
-          <div class="products">
-            ${productsHTML}
+          ${campaign.bannerImage && campaign.bannerImage.url ? `
+            <div style="margin: 20px 0;">
+              <img src="${campaign.bannerImage.url}" style="width: 100%; height: auto; border-radius: 8px;" alt="Campaign Banner" />
+            </div>
+          ` : ''}
+
+          <div class="content">
+            <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 24px;">Featured Products</h2>
+            <div class="products">
+              ${productsHTML || '<p style="text-align: center; color: #999;">No products featured in this campaign.</p>'}
+            </div>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/shop" class="cta-button">Shop All Products</a>
+          </div>
+
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;">You received this email because you subscribed to our newsletter.</p>
+            <p style="margin: 0;">
+              <a href="${unsubscribeLink}" style="color: #999; text-decoration: none;">Unsubscribe</a> | 
+              <a href="${preferencesLink}" style="color: #999; text-decoration: none;">Update Preferences</a>
+            </p>
+            <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} Your Store. All rights reserved.</p>
           </div>
         </div>
+      </body>
+      </html>
+    `;
+  }
 
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL}/shop" class="cta-button">View All Products</a>
-        </div>
-
-        <div class="footer">
-          <p>You received this email because you subscribed to our newsletter.</p>
-          <a href="${process.env.FRONTEND_URL}/unsubscribe?email=${subscriber.email}" style="color: #999; text-decoration: none;">Unsubscribe</a> | 
-          <a href="${process.env.FRONTEND_URL}/newsletter-preferences?email=${subscriber.email}" style="color: #999; text-decoration: none;">Update Preferences</a>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+  escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }
 

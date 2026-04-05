@@ -12,7 +12,9 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/orders', icon: <FiShoppingBag />, label: 'Orders' },
     { path: '/coupons', icon: <FiTag />, label: 'Coupons' },
     { path: '/users', icon: <FiUsers />, label: 'Users' },
-    { path: '/contacts', icon: <FiMail />, label: 'Contacts' }
+    { path: '/contacts', icon: <FiMail />, label: 'Contacts' },
+    { path: '/campaigns', icon: <FiMail />, label: 'Campaigns' },
+    { path: '/subscribers', icon: <FiMail />, label: 'Subscribers' }
   ];
 
   const isActive = (path) => {

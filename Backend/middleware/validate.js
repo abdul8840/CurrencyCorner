@@ -635,16 +635,17 @@ export const validateCampaign = [
     .isLength({ max: 200 }).withMessage('Subject must not exceed 200 characters'),
 
   body('type')
+    .optional()
     .isIn(['promotional', 'announcement', 'newsletter', 'product-showcase'])
     .withMessage('Invalid campaign type'),
 
-  body('products')
-    .optional()
-    .isArray().withMessage('Products must be an array'),
-
   body('targetSegment')
+    .optional()
     .isIn(['all', 'active', 'inactive', 'custom'])
     .withMessage('Invalid target segment'),
 
+  // Skip validation for products since it comes as JSON string from FormData
+  // Will be parsed in controller
+  
   handleValidationErrors
 ];

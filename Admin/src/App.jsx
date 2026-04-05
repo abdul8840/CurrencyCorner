@@ -19,6 +19,10 @@ import AddCouponPage from './pages/AddCouponPage';
 import EditCouponPage from './pages/EditCouponPage';
 import UsersPage from './pages/UsersPage';
 import ContactsPage from './pages/ContactsPage';
+import AdminCampaignsPage from './pages/AdminCampaignsPage';
+import AdminCreateCampaignPage from './pages/AdminCreateCampaignPage';
+import AdminCampaignDetailPage from './pages/AdminCampaignDetailPage';
+import AdminSubscribersPage from './pages/AdminSubscribersPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -97,6 +101,15 @@ function App() {
         <Route path="coupons" element={<CouponsPage />} />
         <Route path="coupons/add" element={<AddCouponPage />} />
         <Route path="coupons/edit/:id" element={<EditCouponPage />} />
+
+        {/* Campaigns Management */}
+            <Route path="campaigns" element={<AdminCampaignsPage />} />
+            <Route path="campaigns/create" element={<AdminCreateCampaignPage />} />
+            <Route path="campaigns/:id" element={<AdminCampaignDetailPage />} />
+            <Route path="campaigns/:id/edit" element={<AdminCreateCampaignPage />} />
+
+            {/* Subscribers Management */}
+            <Route path="subscribers" element={<AdminSubscribersPage />} />
         
         {/* Users */}
         <Route path="users" element={<UsersPage />} />
