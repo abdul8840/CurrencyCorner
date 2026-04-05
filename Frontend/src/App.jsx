@@ -30,6 +30,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
+import NewArrivals from './components/home/NewArrivals';
 
 function App() {
   const dispatch = useDispatch();
@@ -70,6 +71,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/new-arrivals" element={<NewArrivals />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/product/:slug" element={<ProductDetailPage />} />

@@ -1,8 +1,10 @@
+// routes/productRoutes.js
 import express from 'express';
 import {
   createProduct, getAllProducts, getAllProductsAdmin, getProductBySlug,
   getProductById, getProductsByCategory, getFeaturedProducts,
-  getLatestProducts, getRelatedProducts, updateProduct, deleteProduct
+  getLatestProducts, getRelatedProducts, updateProduct, deleteProduct,
+  getNewProducts
 } from '../controllers/productController.js';
 import { protect } from '../middleware/auth.js';
 import { admin } from '../middleware/admin.js';
@@ -13,6 +15,7 @@ const router = express.Router();
 router.get('/', getAllProducts);
 router.get('/admin', protect, admin, getAllProductsAdmin);
 router.get('/featured', getFeaturedProducts);
+router.get('/new', getNewProducts); // New route for new products
 router.get('/latest', getLatestProducts);
 router.get('/category/:slug', getProductsByCategory);
 router.get('/related/:id', getRelatedProducts);

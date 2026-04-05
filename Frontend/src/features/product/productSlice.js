@@ -1,3 +1,4 @@
+// frontend/src/redux/slices/productSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { productAPI } from '../../services/api';
 
@@ -37,6 +38,15 @@ export const fetchFeaturedProducts = createAsyncThunk('product/fetchFeatured', a
   }
 });
 
+export const fetchNewProducts = createAsyncThunk('product/fetchNew', async (params, { rejectWithValue }) => {
+  try {
+    const response = await productAPI.getNew(params);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to fetch new products');
+  }
+});
+
 export const fetchLatestProducts = createAsyncThunk('product/fetchLatest', async (params, { rejectWithValue }) => {
   try {
     const response = await productAPI.getLatest(params);
@@ -61,6 +71,7 @@ const productSlice = createSlice({
     products: [],
     product: null,
     featuredProducts: [],
+    newProducts: [],
     latestProducts: [],
     relatedProducts: [],
     categoryProducts: [],
@@ -111,10 +122,22 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(fetchFeaturedProducts.pending, (state) => { state.loading = true; })
       .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+        state.loading = false;
         state.featuredProducts = action.payload.products;
       })
+      .addCase(fetchNewProducts.pending, (state) => { state.loading = true; })
+      .addCase(fetchNewProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.newProducts = action.payload.products;
+        state.totalProducts = action.payload.totalProducts;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
+      })
+      .addCase(fetchLatestProducts.pending, (state) => { state.loading = true; })
       .addCase(fetchLatestProducts.fulfilled, (state, action) => {
+        state.loading = false;
         state.latestProducts = action.payload.products;
       })
       .addCase(fetchRelatedProducts.fulfilled, (state, action) => {

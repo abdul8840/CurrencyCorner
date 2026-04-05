@@ -1,3 +1,4 @@
+// controllers/productController.js
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import cloudinary from '../config/cloudinary.js';
@@ -37,6 +38,7 @@ export const createProduct = async (req, res) => {
       additionalInfo, price, comparePrice,
       stock: stock || 0,
       isFeatured: isFeatured === 'true',
+      isNew: true, // Mark new products as new
       tags: tags ? (typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : tags) : []
     });
 
@@ -189,6 +191,50 @@ export const getFeaturedProducts = async (req, res) => {
   }
 };
 
+export const getNewProducts = async (req, res) => {
+  try {
+    const resultPerPage = Number(req.query.limit) || 12;
+    const page = Number(req.query.page) || 1;
+
+    // Products marked as new, created in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const countQuery = Product.find({
+      isActive: true,
+      $or: [
+        { isNew: true },
+        { createdAt: { $gte: thirtyDaysAgo } }
+      ]
+    });
+
+    const totalProducts = await countQuery.countDocuments();
+
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { isNew: true },
+        { createdAt: { $gte: thirtyDaysAgo } }
+      ]
+    })
+      .populate('category', 'name slug')
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(resultPerPage)
+      .skip((page - 1) * resultPerPage);
+
+    res.status(200).json({
+      success: true,
+      products,
+      totalProducts,
+      page,
+      pages: Math.ceil(totalProducts / resultPerPage),
+      resultPerPage
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const getLatestProducts = async (req, res) => {
   try {
     const products = await Product.find({ isActive: true })
@@ -233,7 +279,7 @@ export const updateProduct = async (req, res) => {
     const {
       name, description, category, country, year, condition,
       denomination, material, weight, dimensions, rarity,
-      additionalInfo, price, comparePrice, stock, isFeatured, isActive, tags,
+      additionalInfo, price, comparePrice, stock, isFeatured, isActive, isNew, tags,
       removeImages
     } = req.body;
 
@@ -257,6 +303,7 @@ export const updateProduct = async (req, res) => {
     }
     if (isFeatured !== undefined) product.isFeatured = isFeatured === 'true' || isFeatured === true;
     if (isActive !== undefined) product.isActive = isActive === 'true' || isActive === true;
+    if (isNew !== undefined) product.isNew = isNew === 'true' || isNew === true;
     if (tags) product.tags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : tags;
 
     if (removeImages) {

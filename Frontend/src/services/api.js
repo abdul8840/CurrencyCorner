@@ -1,3 +1,4 @@
+// frontend/src/services/api.js
 import axios from 'axios';
 
 const API = axios.create({
@@ -53,6 +54,7 @@ export const productAPI = {
   getBySlug: (slug) => API.get(`/products/slug/${slug}`),
   getByCategory: (slug, params) => API.get(`/products/category/${slug}`, { params }),
   getFeatured: (params) => API.get('/products/featured', { params }),
+  getNew: (params) => API.get('/products/new', { params }), // New API
   getLatest: (params) => API.get('/products/latest', { params }),
   getRelated: (id, params) => API.get(`/products/related/${id}`, { params })
 };
