@@ -1,3 +1,4 @@
+// emailService.js
 import SibApiV3Sdk from 'sib-api-v3-sdk';
 import dotenv from 'dotenv';
 
@@ -20,20 +21,17 @@ class EmailService {
       email: process.env.BREVO_FROM_EMAIL || 'noreply@yourdomain.com',
       name: process.env.BREVO_FROM_NAME || 'Your Store'
     };
-    this.apiInstance = apiInstance; // Store the api instance
+    this.apiInstance = apiInstance;
+    this.brandColor = '#10b981'; // Emerald Green
+    this.accentColor = '#1f2937'; // Dark Gray
+    this.lightBg = '#f0fdf4'; // Light Green
   }
 
   async sendEmail({ to, subject, html, attachment = [] }) {
     try {
       const email = new SibApiV3Sdk.SendSmtpEmail();
-
       email.sender = this.sender;
-      email.to = [
-        {
-          email: to.email,
-          name: to.name || "User"
-        }
-      ];
+      email.to = [{ email: to.email, name: to.name || "User" }];
       email.subject = subject;
       email.htmlContent = html;
 
@@ -50,9 +48,232 @@ class EmailService {
     }
   }
 
+  getBaseTemplate(content) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%);
+            padding: 20px;
+          }
+          .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.1);
+          }
+          .email-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+          }
+          .email-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,50 Q300,0 600,50 T1200,50 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+            pointer-events: none;
+          }
+          .email-header-content { position: relative; z-index: 1; }
+          .email-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+          }
+          .email-header p {
+            font-size: 16px;
+            opacity: 0.95;
+            font-weight: 300;
+          }
+          .email-body {
+            padding: 40px 30px;
+          }
+          .email-footer {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+            border-top: 3px solid #10b981;
+          }
+          .email-footer a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+          }
+          .email-footer a:hover {
+            text-decoration: underline;
+          }
+          .section-title {
+            color: #10b981;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #10b981;
+            display: inline-block;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+          }
+          .info-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+          }
+          .info-card strong {
+            color: #1f2937;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+          }
+          .info-card span {
+            color: #10b981;
+            font-size: 16px;
+            font-weight: 600;
+          }
+          .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            border: none;
+            cursor: pointer;
+          }
+          .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+          }
+          .btn-secondary {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            box-shadow: 0 4px 15px rgba(31, 41, 55, 0.3);
+          }
+          .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(31, 41, 55, 0.4);
+          }
+          .btn-group {
+            text-align: center;
+            margin: 30px 0;
+          }
+          .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          table th {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+          }
+          table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          table tr:last-child td {
+            border-bottom: none;
+          }
+          table tr:hover {
+            background: #f0fdf4;
+          }
+          .highlight-box {
+            background: linear-gradient(135deg, #dcfce7 0%, #ccfbf1 100%);
+            border: 2px solid #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .highlight-box h3 {
+            color: #10b981;
+            margin-bottom: 10px;
+          }
+          .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fecaca 100%);
+            border: 2px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .warning-box h3 {
+            color: #d97706;
+            margin-bottom: 10px;
+          }
+          .list-item {
+            margin: 12px 0;
+            padding-left: 25px;
+            position: relative;
+          }
+          .list-item::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 18px;
+          }
+          .divider {
+            border: none;
+            border-top: 2px dashed #e5e7eb;
+            margin: 30px 0;
+          }
+          .text-center { text-align: center; }
+          .text-muted { color: #6b7280; }
+          .mt-20 { margin-top: 20px; }
+          .mb-20 { margin-bottom: 20px; }
+          @media only screen and (max-width: 600px) {
+            .email-header { padding: 30px 20px; }
+            .email-header h1 { font-size: 24px; }
+            .email-body { padding: 20px; }
+            .info-grid { grid-template-columns: 1fr; }
+            table { font-size: 14px; }
+            table th, table td { padding: 10px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="email-container">
+          ${content}
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
   async sendOrderConfirmation(order, user, invoiceBuffer) {
     const attachments = [];
-
     if (invoiceBuffer) {
       attachments.push({
         content: invoiceBuffer.toString('base64'),
@@ -63,7 +284,7 @@ class EmailService {
 
     return this.sendEmail({
       to: { email: user.email, name: user.name },
-      subject: `Order Confirmed - ${order.orderNumber} | ${process.env.BREVO_FROM_NAME}`,
+      subject: `🎉 Order Confirmed - ${order.orderNumber}`,
       html: this.getOrderConfirmationHTML(order, user),
       attachment: attachments
     });
@@ -72,7 +293,7 @@ class EmailService {
   async sendPasswordResetEmail(user, resetUrl) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
-      subject: "Password Reset Request - Currency Corner",
+      subject: "🔐 Password Reset Request",
       html: this.getPasswordResetHTML(user, resetUrl)
     });
   }
@@ -80,7 +301,7 @@ class EmailService {
   async sendOrderStatusUpdate(order, user) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
-      subject: `Order ${order.orderStatus} - ${order.orderNumber}`,
+      subject: `📦 Order ${order.orderStatus} - ${order.orderNumber}`,
       html: this.getOrderStatusUpdateHTML(order, user)
     });
   }
@@ -88,7 +309,7 @@ class EmailService {
   async sendWelcomeEmail(user) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
-      subject: "Welcome to Currency Corner!",
+      subject: "👋 Welcome to Currency Corner!",
       html: this.getWelcomeHTML(user)
     });
   }
@@ -96,22 +317,19 @@ class EmailService {
   async sendContactFormEmail(contactData) {
     return this.sendEmail({
       to: { email: process.env.BREVO_FROM_EMAIL },
-      subject: `New Contact Form - ${contactData.name}`,
+      subject: `📧 New Contact Form - ${contactData.name}`,
       html: this.getContactFormHTML(contactData)
     });
   }
 
   async sendCampaignEmail(subscriber, campaign, products) {
     try {
-      // Validate required parameters
       if (!subscriber || !subscriber.email) {
         throw new Error('Invalid subscriber data: email is required');
       }
-      
       if (!campaign) {
         throw new Error('Invalid campaign data');
       }
-
       if (!this.apiInstance) {
         throw new Error('Brevo API not initialized');
       }
@@ -120,12 +338,8 @@ class EmailService {
       console.log(`📧 Campaign subject: ${campaign.subject}`);
 
       const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
       sendSmtpEmail.sender = this.sender;
-      sendSmtpEmail.to = [{ 
-        email: subscriber.email, 
-        name: subscriber.name || 'Valued Customer' 
-      }];
+      sendSmtpEmail.to = [{ email: subscriber.email, name: subscriber.name || 'Valued Customer' }];
       sendSmtpEmail.subject = campaign.subject;
       sendSmtpEmail.htmlContent = this.getCampaignHTML(subscriber, campaign, products || []);
 
@@ -143,444 +357,412 @@ class EmailService {
       .map(
         (item) =>
           `<tr>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rs. ${item.price}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rs. ${item.price * item.quantity}</td>
-       </tr>`
+            <td><strong>${item.name}</strong></td>
+            <td style="text-align: center;">${item.quantity}</td>
+            <td style="text-align: right;">Rs. ${item.price}</td>
+            <td style="text-align: right;"><strong>Rs. ${item.price * item.quantity}</strong></td>
+          </tr>`
       )
       .join('');
 
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-          .order-details { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-          th { background-color: #2c3e50; color: white; padding: 10px; text-align: left; }
-          .total-section { background-color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 15px 0; }
-          .payment-section { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107; }
-          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
-          .button { display: inline-block; background-color: #2c3e50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🎉 Order Confirmed!</h1>
-          </div>
-          <div class="content">
-            <p>Dear <strong>${user.name}</strong>,</p>
-            <p>Thank you for your order! Your order has been placed successfully. We're excited to get your items to you.</p>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>🎉 Order Confirmed!</h1>
+          <p>Thank you for your purchase</p>
+        </div>
+      </div>
 
-            <div class="order-details">
-              <h2 style="color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px;">Order Details</h2>
-              <p><strong>Order Number:</strong> <span style="color: #e74c3c;">${order.orderNumber}</span></p>
-              <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              <p><strong>Status:</strong> <span style="background-color: #3498db; color: white; padding: 5px 10px; border-radius: 3px;">${order.orderStatus}</span></p>
+      <div class="email-body">
+        <p>Dear <strong>${user.name}</strong>,</p>
+        <p>We're excited to process your order! Your items are being carefully prepared for shipment.</p>
+
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>Order Number</strong>
+              <span style="font-size: 20px;">#${order.orderNumber}</span>
             </div>
-
-            <h3 style="color: #2c3e50;">Items Ordered</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th style="text-align: center;">Quantity</th>
-                  <th style="text-align: right;">Price</th>
-                  <th style="text-align: right;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsHTML}
-              </tbody>
-            </table>
-
-            <div class="total-section">
-              <table style="margin: 0;">
-                <tr>
-                  <td><strong>Subtotal:</strong></td>
-                  <td style="text-align: right;"><strong>Rs. ${order.subtotal}</strong></td>
-                </tr>
-                ${order.discount > 0 ? `<tr style="color: #27ae60;"><td><strong>Discount:</strong></td><td style="text-align: right;"><strong>-Rs. ${order.discount}</strong></td></tr>` : ''}
-                <tr>
-                  <td><strong>Shipping Charge:</strong></td>
-                  <td style="text-align: right;"><strong>Rs. ${order.shippingCharge}</strong></td>
-                </tr>
-                <tr style="font-size: 16px; border-top: 2px solid #bdc3c7;">
-                  <td><strong>Total Amount:</strong></td>
-                  <td style="text-align: right;"><strong style="color: #e74c3c;">Rs. ${order.totalAmount}</strong></td>
-                </tr>
-              </table>
+            <div class="info-card">
+              <strong>Order Date</strong>
+              <span style="font-size: 16px;">${new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
             </div>
-
-            <div class="payment-section">
-              <h3 style="margin-top: 0; color: #ff6b6b;">💳 Payment Instructions</h3>
-              <p>Please transfer the total amount using the following payment methods:</p>
-              
-              <h4 style="color: #2c3e50; margin-top: 15px;">Bank Transfer</h4>
-              <p>
-                <strong>Bank Name:</strong> ${process.env.STORE_BANK_NAME}<br>
-                <strong>Account Number:</strong> ${process.env.STORE_ACCOUNT_NUMBER}<br>
-                <strong>IFSC Code:</strong> ${process.env.STORE_IFSC}<br>
-                <strong>Account Holder:</strong> ${process.env.STORE_ACCOUNT_HOLDER}
-              </p>
-
-              <h4 style="color: #2c3e50;">UPI Payment</h4>
-              <p><strong>UPI ID:</strong> ${process.env.STORE_UPI}</p>
-
-              <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #fff0c7;">
-                <strong>📱 After payment, please send the payment proof via WhatsApp to:</strong><br>
-                <span style="color: #27ae60; font-size: 16px;"><strong>${process.env.STORE_WHATSAPP}</strong></span>
-              </p>
+            <div class="info-card">
+              <strong>Status</strong>
+              <span style="font-size: 16px; background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block;">✓ ${order.orderStatus}</span>
             </div>
-
-            <div style="text-align: center; margin: 20px 0;">
-              <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/orders/${order._id}" class="button">View Order Details</a>
+            <div class="info-card">
+              <strong>Estimated Delivery</strong>
+              <span style="font-size: 16px;">5-7 Business Days</span>
             </div>
-
-            <p style="margin-top: 20px;">If you have any questions about your order, please don't hesitate to contact us.</p>
-            <p>Thank you for shopping with <strong>Currency Corner</strong>!</p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Currency Corner. All rights reserved.</p>
-            <p>Store Address: ${process.env.STORE_ADDRESS}</p>
           </div>
         </div>
-      </body>
-      </html>
+
+        <h2 class="section-title">📦 Order Items</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHTML}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #d1d5db;">
+            <span>Subtotal</span>
+            <strong>Rs. ${order.subtotal}</strong>
+          </div>
+          ${order.discount > 0 ? `
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #d1d5db; color: #10b981;">
+              <span>Discount</span>
+              <strong>-Rs. ${order.discount}</strong>
+            </div>
+          ` : ''}
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #d1d5db;">
+            <span>Shipping Charge</span>
+            <strong>Rs. ${order.shippingCharge}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 18px;">
+            <span style="color: #10b981; font-weight: 700;">Total Amount</span>
+            <strong style="color: #10b981;">Rs. ${order.totalAmount}</strong>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <h3>💳 Payment Required</h3>
+          <p style="margin: 10px 0;">Please complete the payment using one of the methods below:</p>
+          
+          <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #10b981;">
+            <strong style="display: block; margin-bottom: 8px;">🏦 Bank Transfer</strong>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Bank:</strong> ${process.env.STORE_BANK_NAME}</p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Account:</strong> ${process.env.STORE_ACCOUNT_NUMBER}</p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>IFSC:</strong> ${process.env.STORE_IFSC}</p>
+          </div>
+
+          <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #10b981;">
+            <strong style="display: block; margin-bottom: 8px;">📱 UPI Payment</strong>
+            <p style="margin: 5px 0; font-size: 14px;"><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${process.env.STORE_UPI}</code></p>
+          </div>
+
+          <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #10b981; color: #059669; font-weight: 600;">
+            ✓ After payment, please share proof via WhatsApp to: <strong>${process.env.STORE_WHATSAPP}</strong>
+          </p>
+        </div>
+
+        <div class="btn-group">
+          <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/orders/${order._id}" class="btn">View Order Details</a>
+          <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/shop" class="btn btn-secondary" style="margin-left: 10px;">Continue Shopping</a>
+        </div>
+
+        <hr class="divider">
+
+        <p style="color: #6b7280; font-size: 14px;">
+          Questions? Reach out to us on WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong> or Email: <strong>${process.env.STORE_EMAIL}</strong>
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   getPasswordResetHTML(user, resetUrl) {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-          .reset-box { background-color: #fff3cd; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
-          .button { display: inline-block; background-color: #e74c3c; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🔐 Password Reset Request</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${user.name}</strong>,</p>
-            <p>We received a request to reset the password for your Currency Corner account. Click the button below to reset your password:</p>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" class="button">Reset Password</a>
-            </div>
-
-            <div class="reset-box">
-              <p><strong>⚠️ Important:</strong></p>
-              <ul>
-                <li>This link will expire in <strong>30 minutes</strong></li>
-                <li>The link can only be used once</li>
-                <li>If you didn't request this, please ignore this email</li>
-              </ul>
-            </div>
-
-            <p>If the button doesn't work, copy and paste this link in your browser:</p>
-            <p style="word-break: break-all; background-color: #ecf0f1; padding: 10px; border-radius: 5px;"><code>${resetUrl}</code></p>
-
-            <p style="margin-top: 20px;">For security reasons, never share this link with anyone.</p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Currency Corner. All rights reserved.</p>
-          </div>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>🔐 Password Reset</h1>
+          <p>Secure your account now</p>
         </div>
-      </body>
-      </html>
+      </div>
+
+      <div class="email-body">
+        <p>Hello <strong>${user.name}</strong>,</p>
+        <p>We received a request to reset your password. Click the button below to create a new password:</p>
+
+        <div class="btn-group">
+          <a href="${resetUrl}" class="btn">Reset Password</a>
+        </div>
+
+        <div class="warning-box">
+          <h3>⚠️ Important Security Information</h3>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li class="list-item">This link expires in <strong>30 minutes</strong></li>
+            <li class="list-item">Can only be used <strong>once</strong></li>
+            <li class="list-item">Never share this link with anyone</li>
+            <li class="list-item">If you didn't request this, ignore this email</li>
+          </ul>
+        </div>
+
+        <p style="color: #6b7280; font-size: 13px; margin-top: 20px;">
+          If the button doesn't work, copy and paste this link:<br>
+          <code style="background: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: block; margin-top: 10px; word-break: break-all; font-size: 12px;">${resetUrl}</code>
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 Currency Corner. All rights reserved.</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   getOrderStatusUpdateHTML(order, user) {
-    const statusColors = {
-      'Placed': '#3498db',
-      'Confirmed': '#9b59b6',
-      'Processing': '#f39c12',
-      'Shipped': '#1abc9c',
-      'Delivered': '#27ae60',
-      'Cancelled': '#e74c3c'
+    const statusEmojis = {
+      'Placed': '📋',
+      'Confirmed': '✅',
+      'Processing': '⚙️',
+      'Shipped': '🚚',
+      'Delivered': '📦',
+      'Cancelled': '❌'
     };
 
-    const statusColor = statusColors[order.orderStatus] || '#3498db';
-
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-          .status-box { background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid ${statusColor}; }
-          .status-badge { display: inline-block; background-color: ${statusColor}; color: white; padding: 8px 15px; border-radius: 3px; font-weight: bold; }
-          .tracking-box { background-color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 15px 0; }
-          .button { display: inline-block; background-color: #2c3e50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
-          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>📦 Order Status Update</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${user.name}</strong>,</p>
-            <p>Great news! We have an update on your order.</p>
-
-            <div class="status-box">
-              <p style="margin: 0 0 10px 0;"><strong>Order Number:</strong> ${order.orderNumber}</p>
-              <p style="margin: 0;">
-                <strong>New Status:</strong> <span class="status-badge">${order.orderStatus}</span>
-              </p>
-            </div>
-
-            ${order.trackingNumber ? `
-              <div class="tracking-box">
-                <h3 style="margin-top: 0; color: #2c3e50;">📍 Tracking Information</h3>
-                <p><strong>Tracking Number:</strong> <code style="background-color: white; padding: 5px; border-radius: 3px;">${order.trackingNumber}</code></p>
-                <p>
-                  <a href="https://www.indiapost.gov.in/_layouts/15/DOP.Portal.Tracking/TrackConsignment.aspx" class="button" style="font-size: 14px;">Track Your Shipment</a>
-                </p>
-              </div>
-            ` : ''}
-
-            <div style="text-align: center; margin: 20px 0;">
-              <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/orders/${order._id}" class="button">View Full Details</a>
-            </div>
-
-            <p style="margin-top: 20px; color: #777; font-size: 14px;">
-              If you have any questions, feel free to reach out to us via WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong>
-            </p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Currency Corner. All rights reserved.</p>
-          </div>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>📦 Order Update</h1>
+          <p>Your order is on its way</p>
         </div>
-      </body>
-      </html>
+      </div>
+
+      <div class="email-body">
+        <p>Hello <strong>${user.name}</strong>,</p>
+        <p>Great news! Here's an update on your order:</p>
+
+        <div style="background: linear-gradient(135deg, #dcfce7 0%, #ccfbf1 100%); padding: 25px; border-radius: 8px; margin: 25px 0; border: 2px solid #10b981;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <span style="font-size: 40px;">${statusEmojis[order.orderStatus] || '📦'}</span>
+            <div>
+              <p style="margin: 0; color: #6b7280; font-size: 14px;">Order Status</p>
+              <h2 style="margin: 0; color: #10b981; font-size: 24px;">${order.orderStatus}</h2>
+            </div>
+          </div>
+          <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 1px solid #10b981;">
+            <strong>Order Number:</strong> #${order.orderNumber}
+          </p>
+        </div>
+
+        ${order.trackingNumber ? `
+          <div class="highlight-box">
+            <h3>📍 Tracking Information</h3>
+            <p style="margin: 10px 0;">Your shipment is on the way! Track it in real-time:</p>
+            <p style="background: white; padding: 12px; border-radius: 6px; margin: 10px 0;">
+              <strong>Tracking Number:</strong><br>
+              <code style="background: #f3f4f6; padding: 6px 10px; border-radius: 4px; display: block; margin-top: 5px; font-weight: 600;">${order.trackingNumber}</code>
+            </p>
+            <a href="https://www.indiapost.gov.in/_layouts/15/DOP.Portal.Tracking/TrackConsignment.aspx" class="btn" style="margin-top: 10px;">Track Your Package</a>
+          </div>
+        ` : ''}
+
+        <div class="btn-group">
+          <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/orders/${order._id}" class="btn">View Full Order</a>
+        </div>
+
+        <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+          Questions? Contact us on WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong>
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 Currency Corner. All rights reserved.</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   getWelcomeHTML(user) {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-          .welcome-box { background-color: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745; }
-          .button { display: inline-block; background-color: #2c3e50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
-          .features { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
-          .feature-item { padding: 10px 0; border-bottom: 1px solid #ecf0f1; }
-          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>👋 Welcome to Currency Corner!</h1>
-          </div>
-          <div class="content">
-            <div class="welcome-box">
-              <p style="margin: 0; font-size: 16px;"><strong>Hello ${user.name}! 🎉</strong></p>
-              <p style="margin: 10px 0 0 0;">Your account has been created successfully. Welcome to our community!</p>
-            </div>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>👋 Welcome Aboard!</h1>
+          <p>Glad to have you join our community</p>
+        </div>
+      </div>
 
-            <p>We're thrilled to have you join Currency Corner. Here's what you can do now:</p>
+      <div class="email-body">
+        <p>Hi <strong>${user.name}</strong>,</p>
+        <p>Your account is all set up and ready to go! We're thrilled to welcome you to Currency Corner.</p>
 
-            <div class="features">
-              <div class="feature-item">
-                <strong>🛍️ Shop Our Collection</strong><br>
-                Browse through our curated selection of currency and collectibles.
-              </div>
-              <div class="feature-item">
-                <strong>💰 Exclusive Deals</strong><br>
-                Get access to special offers and discounts for our registered members.
-              </div>
-              <div class="feature-item">
-                <strong>📦 Track Orders</strong><br>
-                Keep track of your orders and shipments in real-time.
-              </div>
-              <div class="feature-item">
-                <strong>💬 Customer Support</strong><br>
-                Our team is here to help you with any questions!
-              </div>
-            </div>
-
-            <div style="text-align: center; margin: 20px 0;">
-              <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}" class="button">Start Shopping Now</a>
-            </div>
-
-            <p style="margin-top: 20px;">If you have any questions, don't hesitate to contact us:</p>
-            <p>
-              📧 Email: <strong>${process.env.STORE_EMAIL}</strong><br>
-              📱 WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong>
-            </p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Currency Corner. All rights reserved.</p>
+        <div class="highlight-box">
+          <h3>🎁 What You Can Do Now</h3>
+          <div style="margin-top: 15px;">
+            <div class="list-item">Explore our curated collection of currencies and collectibles</div>
+            <div class="list-item">Get exclusive access to member-only deals and discounts</div>
+            <div class="list-item">Track your orders in real-time from your dashboard</div>
+            <div class="list-item">Subscribe to our newsletter for latest updates</div>
+            <div class="list-item">Enjoy priority customer support</div>
           </div>
         </div>
-      </body>
-      </html>
+
+        <div class="info-grid" style="margin: 25px 0;">
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); padding: 20px; border-radius: 8px; border-left: 3px solid #10b981;">
+            <h3 style="color: #10b981; margin-bottom: 10px;">🏆 First Purchase Deal</h3>
+            <p style="margin: 0; font-size: 14px;">Use code <strong>WELCOME10</strong> for <strong>10% off</strong> your first order!</p>
+          </div>
+          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 20px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+            <h3 style="color: #d97706; margin-bottom: 10px;">📱 Need Help?</h3>
+            <p style="margin: 0; font-size: 14px;">WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong></p>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/shop" class="btn">Start Shopping</a>
+          <a href="${process.env.FRONTEND_URL || 'https://currencycorner.com'}/account" class="btn btn-secondary" style="margin-left: 10px;">View Profile</a>
+        </div>
+
+        <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+          Welcome gift valid for 7 days on first purchase. Some restrictions may apply.
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   getContactFormHTML(contactData) {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }
-          .info-box { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2c3e50; }
-          .message-box { background-color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 15px 0; font-style: italic; }
-          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>📧 New Contact Form Submission</h1>
-          </div>
-          <div class="content">
-            <p>You have received a new contact form submission:</p>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>📧 New Contact Request</h1>
+          <p>Someone reached out to you</p>
+        </div>
+      </div>
 
-            <div class="info-box">
-              <p><strong>Name:</strong> ${contactData.name}</p>
-              <p><strong>Email:</strong> ${contactData.email}</p>
-              <p><strong>Phone:</strong> ${contactData.phone || 'Not provided'}</p>
-              <p><strong>Subject:</strong> ${contactData.subject || 'No subject'}</p>
+      <div class="email-body">
+        <p>You have received a new contact form submission:</p>
+
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%); padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>Name</strong>
+              <span>${contactData.name}</span>
             </div>
-
-            <div class="message-box">
-              <p><strong>Message:</strong></p>
-              <p>${contactData.message.replace(/\n/g, '<br>')}</p>
+            <div class="info-card">
+              <strong>Email</strong>
+              <span style="word-break: break-all;">${contactData.email}</span>
             </div>
-
-            <p style="color: #777; font-size: 12px;">
-              You can reply directly to this contact's email: ${contactData.email}
-            </p>
-          </div>
-          <div class="footer">
-            <p>© 2024 Currency Corner. All rights reserved.</p>
+            <div class="info-card">
+              <strong>Phone</strong>
+              <span>${contactData.phone || 'Not provided'}</span>
+            </div>
+            <div class="info-card">
+              <strong>Subject</strong>
+              <span>${contactData.subject || 'General'}</span>
+            </div>
           </div>
         </div>
-      </body>
-      </html>
+
+        <h3 class="section-title">💬 Message</h3>
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 3px solid #10b981; margin: 20px 0;">
+          <p style="margin: 0; white-space: pre-wrap; line-height: 1.8;">${contactData.message}</p>
+        </div>
+
+        <div class="btn-group">
+          <a href="mailto:${contactData.email}" class="btn">Reply via Email</a>
+        </div>
+
+        <p style="color: #6b7280; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          This is a forwarded contact form submission from your website.
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 Currency Corner. All rights reserved.</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   getCampaignHTML(subscriber, campaign, products) {
     const productList = Array.isArray(products) ? products : [];
     
     const productsHTML = productList.slice(0, 6).map(product => `
-      <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${product._id}" style="text-decoration: none; color: #333;">
-          <div style="height: 200px; background: #f5f5f5; border-radius: 8px; margin-bottom: 10px; overflow: hidden;">
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${product._id}" style="text-decoration: none; color: inherit;">
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 2px solid #e5e7eb; transition: all 0.3s ease; overflow: hidden;">
+          <div style="height: 200px; background: #f3f4f6; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
             ${product.images && product.images.length > 0 && product.images[0].url 
               ? `<img src="${product.images[0].url}" style="width: 100%; height: 100%; object-fit: cover;" />` 
-              : '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e0e0e0; color: #999;">No Image</div>'}
+              : '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e5e7eb; color: #9ca3af;">No Image</div>'}
           </div>
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #333;">${this.escapeHtml(product.name || 'Product')}</h3>
-          <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; line-height: 1.4;">${this.escapeHtml((product.description || '').substring(0, 100))}...</p>
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #1f2937;">${this.escapeHtml(product.name || 'Product')}</h3>
+          <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">${this.escapeHtml((product.description || '').substring(0, 80))}...</p>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 18px; font-weight: bold; color: #2c3e50;">Rs. ${product.price || 0}</span>
-            <span style="background: #2c3e50; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; display: inline-block;">View Details</span>
+            <span style="font-size: 20px; font-weight: 700; color: #10b981;">Rs. ${product.price || 0}</span>
+            <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px;">View →</span>
           </div>
-        </a>
-      </div>
+        </div>
+      </a>
     `).join('');
 
     const unsubscribeLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe?email=${encodeURIComponent(subscriber.email)}`;
     const preferencesLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/newsletter-preferences?email=${encodeURIComponent(subscriber.email)}`;
 
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${this.escapeHtml(campaign.title)}</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; background: white; }
-          .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0; }
-          .content { padding: 30px 0; }
-          .products { display: grid; gap: 15px; }
-          .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; border-top: 1px solid #eee; margin-top: 30px; }
-          .cta-button { display: inline-block; background: #2c3e50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; }
-          .cta-button:hover { background: #1a252f; }
-          @media only screen and (max-width: 600px) {
-            .container { width: 100% !important; }
-            .products { grid-template-columns: 1fr !important; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1 style="margin: 0 0 10px 0; font-size: 28px;">${this.escapeHtml(campaign.title)}</h1>
-            <p style="margin: 0; opacity: 0.9; font-size: 16px;">${this.escapeHtml(campaign.description)}</p>
-          </div>
-
-          ${campaign.bannerImage && campaign.bannerImage.url ? `
-            <div style="margin: 20px 0;">
-              <img src="${campaign.bannerImage.url}" style="width: 100%; height: auto; border-radius: 8px;" alt="Campaign Banner" />
-            </div>
-          ` : ''}
-
-          <div class="content">
-            <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 24px;">Featured Products</h2>
-            <div class="products">
-              ${productsHTML || '<p style="text-align: center; color: #999;">No products featured in this campaign.</p>'}
-            </div>
-          </div>
-
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/shop" class="cta-button">Shop All Products</a>
-          </div>
-
-          <div class="footer">
-            <p style="margin: 0 0 10px 0;">You received this email because you subscribed to our newsletter.</p>
-            <p style="margin: 0;">
-              <a href="${unsubscribeLink}" style="color: #999; text-decoration: none;">Unsubscribe</a> | 
-              <a href="${preferencesLink}" style="color: #999; text-decoration: none;">Update Preferences</a>
-            </p>
-            <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} Your Store. All rights reserved.</p>
-          </div>
+    const content = `
+      <div class="email-header">
+        <div class="email-header-content">
+          <h1>${this.escapeHtml(campaign.title)}</h1>
+          <p>${this.escapeHtml(campaign.description)}</p>
         </div>
-      </body>
-      </html>
+      </div>
+
+      ${campaign.bannerImage && campaign.bannerImage.url ? `
+        <div style="margin: 0; overflow: hidden;">
+          <img src="${campaign.bannerImage.url}" style="width: 100%; height: auto; display: block;" alt="Campaign Banner" />
+        </div>
+      ` : ''}
+
+      <div class="email-body">
+        <h2 class="section-title">✨ Featured Products</h2>
+        
+        <div style="display: grid; gap: 8px;">
+          ${productsHTML || '<p style="text-align: center; color: #9ca3af; padding: 20px;">No featured products available</p>'}
+        </div>
+
+        <div class="btn-group">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/shop" class="btn">Shop All Products</a>
+        </div>
+
+        <hr class="divider">
+
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%); padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #10b981; margin-bottom: 15px;">🎯 Why Choose Us?</h3>
+          <div class="list-item">Authentic and verified currency collections</div>
+          <div class="list-item">Competitive pricing with transparent information</div>
+          <div class="list-item">Fast and secure delivery</div>
+          <div class="list-item">Expert customer support</div>
+        </div>
+      </div>
+
+      <div class="email-footer">
+        <p>You received this because you subscribed to our newsletter.</p>
+        <p style="margin: 10px 0;">
+          <a href="${unsubscribeLink}">Unsubscribe</a> | 
+          <a href="${preferencesLink}">Preferences</a>
+        </p>
+        <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} Currency Corner. All rights reserved.</p>
+      </div>
     `;
+
+    return this.getBaseTemplate(content);
   }
 
   escapeHtml(text) {
