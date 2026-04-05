@@ -37,11 +37,6 @@ const HomePage = () => {
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <CategorySection />
       </section>
-      
-      {/* Featured Products Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-green-50 to-emerald-50">
-        <FeaturedProducts />
-      </section>
 
       {/* New Arrivals Section */}
       <NewArrivals />
@@ -66,11 +61,11 @@ const HomePage = () => {
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
                 Free Shipping on Orders Above
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                  ₹500
+                  ₹1000
                 </span>
               </h2>
               <p className="text-lg text-gray-300 mb-8 max-w-xl leading-relaxed">
-                Start building your collection today! Enjoy free delivery on all orders over ₹500. Premium packaging guaranteed.
+                Start building your collection today! Enjoy free delivery on all orders over ₹1000. Premium packaging guaranteed.
               </p>
               
               {/* Feature List */}
@@ -126,71 +121,9 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Latest Products Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <LatestProducts />
-      </section>
-      
       {/* Why Choose Us Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <WhyChooseUs />
-      </section>
-      
-      {/* Newsletter Section - Premium Design */}
-      <section className="py-16 sm:py-20 lg:py-28 bg-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full opacity-5 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-200 to-green-200 rounded-full opacity-5 blur-3xl"></div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl p-8 sm:p-12 lg:p-16 border-2 border-green-200 shadow-2xl shadow-green-500/10">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-8 shadow-xl shadow-green-500/30">
-                <FiMail className="w-10 h-10 text-white" />
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600 mb-4">
-                Join Our Newsletter
-              </h2>
-              <p className="text-gray-700 max-w-2xl mx-auto mb-10 text-lg">
-                Get exclusive offers, new arrivals, and numismatic insights delivered to your inbox. Subscribe now and get 10% off your first order!
-              </p>
-              <form onSubmit={handleNewsletterSubmit} className="w-full max-w-md">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-600" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                      className="w-full px-6 py-4 pl-14 rounded-xl border-2 border-green-300 bg-white text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:outline-none focus:border-green-600 focus:ring-4 focus:ring-green-500/20"
-                    />
-                  </div>
-                  <button 
-                    type="submit"
-                    disabled={subscribing}
-                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-green-500/40 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-fit"
-                  >
-                    {subscribing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span className="hidden sm:inline">Subscribing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Subscribe</span>
-                        <FiArrowRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-600 mt-4">
-                  By subscribing, you agree to our Privacy Policy. Unsubscribe anytime.
-                </p>
-              </form>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Trust Badges Section */}
@@ -198,10 +131,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {[
-              { number: '5000+', label: 'Happy Customers', icon: '😊' },
-              { number: '10000+', label: 'Items Sold', icon: '🏆' },
+              { number: '100+', label: 'Happy Customers', icon: '😊' },
+              { number: '500+', label: 'Items Sold', icon: '🏆' },
               { number: '100%', label: 'Authentic Items', icon: '✓' },
-              { number: '4.9★', label: 'Customer Rating', icon: '⭐' }
+              { number: '4.7★', label: 'Customer Rating', icon: '⭐' }
             ].map((stat, index) => (
               <div key={index} className="text-center group hover:transform hover:scale-105 transition duration-300">
                 <div className="text-4xl sm:text-5xl mb-3">{stat.icon}</div>

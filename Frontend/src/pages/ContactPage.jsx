@@ -14,7 +14,7 @@ import {
   FiExternalLink,
   FiCheckCircle
 } from 'react-icons/fi';
-import { FaWhatsapp, FaInstagram, FaFacebookF, FaTwitter } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import emailjs from '@emailjs/browser';
 
@@ -63,36 +63,35 @@ const ContactPage = () => {
     {
       icon: FiMapPin,
       title: "Visit Us",
-      description: "123 Collector Street, Mumbai, Maharashtra, India 400001",
+      description: "Prayagraj, Uttar Pradesh, India",
       color: "bg-blue-500"
     },
     {
       icon: FiPhone,
       title: "Call Us",
-      description: "+91-9876543210",
-      link: "tel:+919876543210",
+      description: "+91 7081434589",
+      link: "tel:+917081434589",
       color: "bg-primary"
     },
     {
       icon: FiMail,
       title: "Email Us",
-      description: "info@currencycorner.com",
-      link: "mailto:info@currencycorner.com",
+      description: "arhobby@gmail.com",
+      link: "mailto:arhobby@gmail.com",
       color: "bg-amber-500"
     },
     {
-      icon: FiClock,
-      title: "Working Hours",
-      description: "Mon - Sat: 10:00 AM - 7:00 PM",
-      color: "bg-purple-500"
+      icon: FaWhatsapp,
+      title: "WhatsApp Us",
+      description: "+91 7081434589",
+      link: "https://wa.me/917081434589",
+      color: "bg-green-500"
     }
   ];
 
   const socialLinks = [
-    { icon: FaWhatsapp, href: "https://wa.me/919876543210", label: "WhatsApp", color: "bg-green-500 hover:bg-green-600" },
+    { icon: FaWhatsapp, href: "https://wa.me/917081434589", label: "WhatsApp", color: "bg-green-500 hover:bg-green-600" },
     { icon: FaInstagram, href: "#", label: "Instagram", color: "bg-pink-500 hover:bg-pink-600" },
-    { icon: FaFacebookF, href: "#", label: "Facebook", color: "bg-blue-600 hover:bg-blue-700" },
-    { icon: FaTwitter, href: "#", label: "Twitter", color: "bg-sky-500 hover:bg-sky-600" }
   ];
 
   return (
@@ -195,7 +194,7 @@ const ContactPage = () => {
                       Get instant support! Chat with us directly on WhatsApp for quick responses.
                     </p>
                     <a 
-                      href="https://wa.me/919876543210" 
+                      href="https://wa.me/7081434589" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:bg-green-600 hover:shadow-lg active:scale-95"
@@ -227,17 +226,6 @@ const ContactPage = () => {
                       </a>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* Map Placeholder */}
-              <div className="bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm">
-                <div className="aspect-video bg-primary-50 flex items-center justify-center">
-                  <div className="text-center">
-                    <FiMapPin className="w-12 h-12 text-primary mx-auto mb-3" />
-                    <p className="text-text-secondary">Map Location</p>
-                    <p className="text-sm text-text-light">Mumbai, Maharashtra</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -370,25 +358,6 @@ const ContactPage = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* FAQ CTA */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-text-secondary mb-6">
-            Find quick answers to common questions about our products, shipping, and more.
-          </p>
-          <a 
-            href="/faq"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:bg-primary-dark hover:shadow-lg active:scale-95"
-          >
-            View FAQs
-            <FiExternalLink className="w-4 h-4" />
-          </a>
         </div>
       </section>
     </div>

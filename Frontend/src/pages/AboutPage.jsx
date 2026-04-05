@@ -69,9 +69,9 @@ const AboutPage = () => {
   ];
 
   const stats = [
-    { number: "5000+", label: "Items Sold", icon: FiPackage },
-    { number: "2000+", label: "Happy Collectors", icon: FiUsers },
-    { number: "50+", label: "Countries", icon: FiGlobe },
+    { number: "500+", label: "Items Sold", icon: FiPackage },
+    { number: "1000+", label: "Happy Collectors", icon: FiUsers },
+    { number: "80+", label: "Countries", icon: FiGlobe },
     { number: "100%", label: "Authentic", icon: FiShield }
   ];
 
@@ -151,13 +151,16 @@ const AboutPage = () => {
                     <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
                       <GiCoinflip className="w-12 h-12 sm:w-16 sm:h-16 text-primary" />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">Since 2020</h3>
-                    <p className="text-text-light">Serving Collectors Worldwide</p>
-                    <div className="flex justify-center gap-2 mt-4">
-                      {[...Array(5)].map((_, i) => (
-                        <FiStar key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
-                      ))}
-                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">AR Hobby</h2>
+                    <p className="text-sm text-text-light leading-relaxed">
+                      A passionate marketplace for collectors, offering a curated selection of rare and authentic currencies from around the world.
+                    </p>
+
+                    <Link to="/shop" className="inline-flex items-center gap-3 mt-6 px-5 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-all duration-300">
+                      Explore Our Collection
+                      <FiArrowRight className="w-4 h-4" />
+                    </Link>
+
                   </div>
                 </div>
               </div>
@@ -192,7 +195,7 @@ const AboutPage = () => {
               
               {/* Features List */}
               <div className="mt-6 space-y-3">
-                {['Expert Authentication', 'Worldwide Shipping', 'Secure Packaging', 'Collector Community'].map((feature, i) => (
+                {['Expert Authentication', 'India Post Shipping', 'Secure Packaging', 'Collector Community'].map((feature, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                       <FiCheckCircle className="w-4 h-4 text-white" />
@@ -292,30 +295,6 @@ const AboutPage = () => {
                 <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact CTA Section */}
-      <section className="py-12 sm:py-16 bg-secondary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Have Questions?</h2>
-          <p className="text-gray-300 mb-6 max-w-xl mx-auto">
-            We're here to help! Reach out to us for any queries about our collection or your orders.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link 
-              to="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-secondary font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:bg-primary-50 active:scale-95"
-            >
-              Contact Us
-            </Link>
-            <Link 
-              to="/faq"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-white font-semibold rounded-xl border-2 border-white cursor-pointer transition-all duration-300 hover:bg-white hover:text-secondary active:scale-95"
-            >
-              View FAQs
-            </Link>
           </div>
         </div>
       </section>

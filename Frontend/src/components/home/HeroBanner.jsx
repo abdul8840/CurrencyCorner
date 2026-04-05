@@ -42,7 +42,7 @@ const HeroBanner = () => {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
             </span>
             <span className="text-primary-dark text-xs sm:text-sm font-semibold tracking-wide">
-              Trusted by 10,000+ Collectors Worldwide
+              100% Original & Authentic Banknotes
             </span>
           </div>
 
@@ -106,10 +106,9 @@ const HeroBanner = () => {
                         border-t border-border-light/50
                         animate-[fadeIn_1s_ease-out_0.8s_both]">
             {[
-              { value: '5,000+', label: 'Products' },
-              { value: '50+', label: 'Countries' },
-              { value: '10K+', label: 'Customers' },
-              { value: '4.9★', label: 'Rating' },
+              { value: '500+', label: 'Products' },
+              { value: '80+', label: 'Countries' },
+              { value: '100+', label: 'Customers' },
             ].map((stat, index) => (
               <div key={index} className="text-center sm:text-left">
                 <p className="text-2xl sm:text-3xl font-extrabold text-primary mb-1">

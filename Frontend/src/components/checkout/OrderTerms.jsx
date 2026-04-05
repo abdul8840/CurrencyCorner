@@ -25,7 +25,7 @@ const OrderTerms = ({ accepted, onAcceptChange }) => {
     },
     {
       icon: FiRefreshCw,
-      text: "Returns are accepted within 7 days if the item significantly differs from the description."
+      text: "Once an item has been shipped, returns will not be accepted. Please contact us immediately if there are any issues with your order. We will do our best to resolve any problems, but we cannot accept returns or cancellations after shipping."
     },
     {
       icon: FiCreditCard,
@@ -78,30 +78,21 @@ const OrderTerms = ({ accepted, onAcceptChange }) => {
 
         {/* Acceptance Checkbox */}
         <div 
-          className={`p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+          className={`p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 ${
             accepted 
               ? 'bg-primary-50 border-primary' 
               : 'bg-bg-secondary border-border-light hover:border-primary-300'
           }`}
-          onClick={() => onAcceptChange(!accepted)}
         >
           <label className="flex items-start gap-3 cursor-pointer">
-            <div className="relative mt-0.5">
-              <input
-                type="checkbox"
-                checked={accepted}
-                onChange={(e) => onAcceptChange(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className={`w-6 h-6 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${
-                accepted 
-                  ? 'bg-primary border-primary' 
-                  : 'border-border bg-white peer-hover:border-primary-400'
-              }`}>
-                {accepted && <FiCheck className="w-4 h-4 text-white" />}
-              </div>
-            </div>
-            <span className={`text-sm sm:text-base font-medium transition-colors ${
+            <input
+              type="checkbox"
+              checked={accepted}
+              onChange={(e) => onAcceptChange(e.target.checked)}
+              className="w-6 h-6 mt-0.5 cursor-pointer accent-primary rounded transition-all duration-300 hover:accent-primary-dark"
+              aria-label="Accept terms and conditions"
+            />
+            <span className={`text-sm sm:text-base font-medium transition-colors select-none ${
               accepted ? 'text-primary-dark' : 'text-text-secondary'
             }`}>
               I have read and agree to the terms and conditions
@@ -111,7 +102,7 @@ const OrderTerms = ({ accepted, onAcceptChange }) => {
 
         {/* Warning if not accepted */}
         {!accepted && (
-          <div className="mt-4 flex items-center gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+          <div className="mt-4 flex items-center gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg animate-fade-in">
             <FiAlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
             <p className="text-sm text-warning font-medium">
               Please accept the terms and conditions to proceed with your order

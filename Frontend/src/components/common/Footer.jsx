@@ -42,9 +42,9 @@ const Footer = () => {
             <div className="flex flex-col gap-3">
               {[
                 { to: '/', label: 'Home' },
+                { to: '/new-arrivals', label: 'New Arrivals' },
                 { to: '/shop', label: 'Shop' },
                 { to: '/about', label: 'About Us' },
-                { to: '/contact', label: 'Contact' },
               ].map((link) => (
                 <Link
                   key={link.to}
@@ -71,7 +71,7 @@ const Footer = () => {
                 { to: '/profile', label: 'Profile' },
                 { to: '/orders', label: 'My Orders' },
                 { to: '/addresses', label: 'Addresses' },
-                { to: '/cart', label: 'Cart' },
+                { to: '/contact', label: 'Contact' },
               ].map((link) => (
                 <Link
                   key={link.to}
@@ -96,15 +96,15 @@ const Footer = () => {
             <div className="flex flex-col gap-4">
               <p className="flex items-start gap-3 text-gray-400 text-sm sm:text-base">
                 <FiMapPin className="text-primary-light text-lg mt-0.5 flex-shrink-0" />
-                <span>123 Collector Street, Mumbai, India</span>
+                <span>Prayagraj, Uttar Pardesh, India</span>
               </p>
               <p className="flex items-center gap-3 text-gray-400 text-sm sm:text-base">
                 <FiPhone className="text-primary-light text-lg flex-shrink-0" />
-                <span>+91-9876543210</span>
+                <span>+91-7081434589</span>
               </p>
               <p className="flex items-center gap-3 text-gray-400 text-sm sm:text-base">
                 <FiMail className="text-primary-light text-lg flex-shrink-0" />
-                <span>info@currencycorner.com</span>
+                <span>arhobby@email.com</span>
               </p>
             </div>
           </div>
