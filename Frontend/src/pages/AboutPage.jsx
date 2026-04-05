@@ -77,7 +77,7 @@ const AboutPage = () => {
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      <SEO title="About Us" description="Learn about Currency Corner and our passion for numismatics" />
+      <SEO title="About Us" description="Learn about AR Hobby and our passion for numismatics" />
       
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white overflow-hidden">
@@ -96,7 +96,7 @@ const AboutPage = () => {
               <span className="text-sm font-medium text-primary-100">Established 2020</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
-              About <span className="text-primary-300">Currency Corner</span>
+              About <span className="text-primary-300">AR Hobby</span>
             </h1>
             <p className="text-lg sm:text-xl text-primary-100 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Your trusted destination for rare and collectible currencies from around the world
@@ -174,7 +174,7 @@ const AboutPage = () => {
               </h2>
               <div className="space-y-4 text-text-secondary leading-relaxed">
                 <p>
-                  Currency Corner was born from a deep passion for numismatics and the rich history 
+                  AR Hobby was born from a deep passion for numismatics and the rich history 
                   embedded in every coin and banknote. What started as a personal collection has grown 
                   into a trusted marketplace for collectors worldwide.
                 </p>

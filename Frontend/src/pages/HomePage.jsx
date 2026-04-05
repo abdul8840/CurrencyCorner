@@ -28,7 +28,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      <SEO title="Home" description="Currency Corner - Your destination for collectible currencies and coins" />
+      <SEO title="Home" description="AR Hobby - Your destination for collectible currencies and coins" />
       
       {/* Hero Section */}
       <HeroBanner />

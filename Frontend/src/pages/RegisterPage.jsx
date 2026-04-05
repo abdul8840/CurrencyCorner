@@ -117,7 +117,7 @@ const RegisterPage = () => {
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
           {/* Logo */}
           <Link to="/" className="mb-12">
-            <h2 className="text-3xl font-bold">Currency Corner</h2>
+            <h2 className="text-3xl font-bold">AR Hobby</h2>
           </Link>
           
           {/* Welcome Text */}
@@ -126,7 +126,7 @@ const RegisterPage = () => {
               Start Your Collection Journey
             </h1>
             <p className="text-lg text-white/80 leading-relaxed">
-              Join thousands of collectors who trust Currency Corner for authentic coins, 
+              Join thousands of collectors who trust AR Hobby for authentic coins, 
               notes, and stamps. Create your account today and unlock exclusive benefits.
             </p>
           </div>
@@ -154,7 +154,7 @@ const RegisterPage = () => {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-block">
-              <h2 className="text-2xl font-bold text-primary">Currency Corner</h2>
+              <h2 className="text-2xl font-bold text-primary">AR Hobby</h2>
             </Link>
           </div>
 
@@ -167,7 +167,7 @@ const RegisterPage = () => {
                 <FiUser className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Create Account</h1>
-              <p className="text-text-secondary mt-2">Join Currency Corner to start collecting</p>
+              <p className="text-text-secondary mt-2">Join AR Hobby to start collecting</p>
             </div>
 
             {/* Form */}
@@ -408,7 +408,7 @@ const RegisterPage = () => {
           {/* Footer */}
           <p className="text-center text-sm text-text-light mt-6">
             By creating an account, you agree to receive updates and promotional 
-            emails from Currency Corner.
+            emails from AR Hobby.
           </p>
         </div>
       </div>

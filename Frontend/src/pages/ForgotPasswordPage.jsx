@@ -155,7 +155,7 @@ const ForgotPasswordPage = () => {
             className="inline-flex items-center gap-2 text-text-secondary hover:text-primary transition-colors cursor-pointer"
           >
             <GiCoinflip className="w-5 h-5" />
-            <span className="font-semibold">Currency Corner</span>
+            <span className="font-semibold">AR Hobby</span>
           </Link>
         </div>
       </div>

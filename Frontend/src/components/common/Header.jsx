@@ -58,7 +58,7 @@ const Header = () => {
                 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-primary 
                             tracking-tight group-hover:text-primary-dark transition-colors duration-300"
               >
-                Currency<span className="text-secondary">Corner</span>
+                AR<span className="text-secondary">Hobby</span>
               </h1>
             </Link>
 

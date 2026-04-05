@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 const SEO = ({ title, description }) => {
   useEffect(() => {
-    document.title = title ? `${title} | Currency Corner` : 'Currency Corner - Collectible Currencies & Coins';
+    document.title = title ? `${title} | AR Hobby` : 'AR Hobby - Collectible Currencies & Coins';
     if (description) {
       let metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {

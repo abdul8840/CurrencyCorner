@@ -97,7 +97,7 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-bg-primary">
-      <SEO title="Contact Us" description="Get in touch with Currency Corner" />
+      <SEO title="Contact Us" description="Get in touch with AR Hobby" />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 overflow-hidden">

@@ -60,7 +60,7 @@ const LoginPage = () => {
             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">
               <GiCoinflip className="w-7 h-7 text-white" />
             </div>
-            <span className="text-2xl font-bold text-text-primary">Currency Corner</span>
+            <span className="text-2xl font-bold text-text-primary">AR Hobby</span>
           </Link>
 
           {/* Welcome Text */}
@@ -175,7 +175,7 @@ const LoginPage = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-gradient-to-br from-primary-50 via-white to-primary-100 text-text-light">
-                New to Currency Corner?
+                New to AR Hobby?
               </span>
             </div>
           </div>
@@ -212,7 +212,7 @@ const LoginPage = () => {
             <GiCoinflip className="w-16 h-16 text-white" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Welcome to Currency Corner
+            Welcome to AR Hobby
           </h2>
           <p className="text-lg text-primary-100 mb-8">
             Your trusted destination for rare and collectible currencies from around the world.

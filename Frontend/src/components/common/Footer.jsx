@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="sm:col-span-2 lg:col-span-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-primary-light mb-4 tracking-tight">
-              Currency Corner
+              AR Hobby
             </h2>
             <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-xs">
               Your trusted destination for collectible currencies, coins, and numismatic
@@ -113,7 +113,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700/60 py-6">
           <p className="text-center text-gray-500 text-xs sm:text-sm">
-            &copy; {new Date().getFullYear()} Currency Corner. All rights reserved.
+            &copy; {new Date().getFullYear()} AR Hobby. All rights reserved.
           </p>
         </div>
       </div>

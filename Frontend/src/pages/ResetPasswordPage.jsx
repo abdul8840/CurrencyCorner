@@ -138,7 +138,7 @@ const ResetPasswordPage = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h2 className="text-2xl font-bold text-primary">Currency Corner</h2>
+            <h2 className="text-2xl font-bold text-primary">AR Hobby</h2>
           </Link>
         </div>
 

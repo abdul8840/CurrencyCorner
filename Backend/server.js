@@ -36,7 +36,7 @@ app.use(cors({
 }));
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Currency Corner API is running' });
+  res.json({ status: 'OK', message: 'AR Hobby API is running' });
 });
 
 app.use('/api/auth', authRoutes);

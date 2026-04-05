@@ -13,7 +13,7 @@ class InvoiceService {
         doc.on('end', () => resolve(Buffer.concat(buffers)));
         doc.on('error', (err) => reject(err));
 
-        doc.fontSize(20).text('Currency Corner', { align: 'center' });
+        doc.fontSize(20).text('AR Hobby', { align: 'center' });
         doc.fontSize(10).text('Collectible Currencies & Coins', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(8).text(process.env.STORE_ADDRESS || '', { align: 'center' });
@@ -88,7 +88,7 @@ class InvoiceService {
         doc.text(`Account Holder: ${process.env.STORE_ACCOUNT_HOLDER || ''}`, 50, y); y += 12;
         doc.text(`UPI: ${process.env.STORE_UPI || ''}`, 50, y); y += 20;
 
-        doc.fontSize(8).text('Thank you for shopping with Currency Corner!', 50, y, { align: 'center', width: 495 });
+        doc.fontSize(8).text('Thank you for shopping with AR Hobby!', 50, y, { align: 'center', width: 495 });
         doc.end();
       } catch (err) {
         reject(err);

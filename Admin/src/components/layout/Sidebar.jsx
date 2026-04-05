@@ -44,7 +44,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="p-6 border-b border-gray-800 relative">
           <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Currency Corner
+            AR Hobby
           </h1>
           <p className="text-sm text-gray-400 mt-1 font-medium">Admin Panel</p>
           
@@ -98,7 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="p-4 border-t border-gray-800">
           <div className="px-4 py-3 bg-gray-900 rounded-lg">
             <p className="text-xs text-gray-400">Version 1.0.0</p>
-            <p className="text-xs text-gray-500 mt-1">© 2024 Currency Corner</p>
+            <p className="text-xs text-gray-500 mt-1">© 2024 AR Hobby</p>
           </div>
         </div>
       </aside>

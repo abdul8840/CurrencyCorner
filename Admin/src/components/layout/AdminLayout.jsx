@@ -28,7 +28,7 @@ const AdminLayout = () => {
         <footer className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
           <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="text-sm text-gray-500">
-              © 2024 Currency Corner. All rights reserved.
+              © 2024 AR Hobby. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-sm text-gray-500 hover:text-black transition-colors duration-200 cursor-pointer">

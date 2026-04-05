@@ -53,7 +53,7 @@ const WhyChooseUs = () => {
             Our Promise
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text-white mb-4 tracking-tight">
-            Why Choose <span className="text-primary-light">Currency Corner</span>
+            Why Choose <span className="text-primary-light">AR Hobby</span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
             We are committed to providing the best experience for collectors

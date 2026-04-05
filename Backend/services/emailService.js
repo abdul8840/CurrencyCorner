@@ -309,7 +309,7 @@ class EmailService {
   async sendWelcomeEmail(user) {
     return this.sendEmail({
       to: { email: user.email, name: user.name },
-      subject: "👋 Welcome to Currency Corner!",
+      subject: "👋 Welcome to AR Hobby!",
       html: this.getWelcomeHTML(user)
     });
   }
@@ -470,7 +470,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p>© 2024 AR Hobby. All rights reserved.</p>
         <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
       </div>
     `;
@@ -512,7 +512,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p>© 2024 AR Hobby. All rights reserved.</p>
       </div>
     `;
 
@@ -576,7 +576,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p>© 2024 AR Hobby. All rights reserved.</p>
       </div>
     `;
 
@@ -594,7 +594,7 @@ class EmailService {
 
       <div class="email-body">
         <p>Hi <strong>${user.name}</strong>,</p>
-        <p>Your account is all set up and ready to go! We're thrilled to welcome you to Currency Corner.</p>
+        <p>Your account is all set up and ready to go! We're thrilled to welcome you to AR Hobby.</p>
 
         <div class="highlight-box">
           <h3>🎁 What You Can Do Now</h3>
@@ -629,7 +629,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p>© 2024 AR Hobby. All rights reserved.</p>
         <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
       </div>
     `;
@@ -685,7 +685,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>© 2024 Currency Corner. All rights reserved.</p>
+        <p>© 2024 AR Hobby. All rights reserved.</p>
       </div>
     `;
 
@@ -758,7 +758,7 @@ class EmailService {
           <a href="${unsubscribeLink}">Unsubscribe</a> | 
           <a href="${preferencesLink}">Preferences</a>
         </p>
-        <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} Currency Corner. All rights reserved.</p>
+        <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} AR Hobby. All rights reserved.</p>
       </div>
     `;
 
