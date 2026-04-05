@@ -2,8 +2,6 @@
 import SEO from '../components/common/SEO';
 import HeroBanner from '../components/home/HeroBanner';
 import CategorySection from '../components/home/CategorySection';
-import FeaturedProducts from '../components/home/FeaturedProducts';
-import LatestProducts from '../components/home/LatestProducts';
 import NewArrivals from '../components/home/NewArrivals';
 import WhyChooseUs from '../components/home/WhyChooseUs';
 import { Link } from 'react-router-dom';
@@ -12,19 +10,6 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 const HomePage = () => {
-  const [email, setEmail] = useState('');
-  const [subscribing, setSubscribing] = useState(false);
-
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    if (!email) return;
-    
-    setSubscribing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success('Thanks for subscribing!');
-    setEmail('');
-    setSubscribing(false);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50">

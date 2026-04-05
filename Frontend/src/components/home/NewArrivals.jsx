@@ -52,37 +52,8 @@ const NewArrivals = () => {
         </div>
 
         {/* Products Grid - Desktop */}
-        <div className="hidden lg:grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {newProducts.slice(0, 4).map((product) => (
-            <ProductCard key={product._id} product={product} isNew={true} />
-          ))}
-        </div>
-
-        {/* Products Slider - Mobile */}
-        <div className="lg:hidden mb-8">
-          <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            slidesPerView={1}
-            spaceBetween={20}
-            pagination={{ clickable: true, dynamicBullets: true }}
-            autoplay={{ delay: 4000, disableOnInteraction: false }}
-            breakpoints={{
-              640: { slidesPerView: 2, spaceBetween: 16 },
-              1024: { slidesPerView: 3, spaceBetween: 24 }
-            }}
-            className="!pb-12"
-          >
-            {newProducts.map((product) => (
-              <SwiperSlide key={product._id}>
-                <ProductCard product={product} isNew={true} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-
-        {/* Secondary Row - Desktop */}
-        <div className="hidden lg:grid grid-cols-4 gap-6 mb-8">
-          {newProducts.slice(4, 8).map((product) => (
             <ProductCard key={product._id} product={product} isNew={true} />
           ))}
         </div>
