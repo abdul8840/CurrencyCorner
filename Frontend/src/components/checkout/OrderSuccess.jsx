@@ -1,9 +1,10 @@
 // OrderSuccess.jsx
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/helpers';
-import { FiCheckCircle, FiCopy, FiExternalLink, FiPackage, FiShoppingBag, FiArrowRight, FiCreditCard, FiSmartphone } from 'react-icons/fi';
+import { FiCheckCircle, FiCopy, FiExternalLink, FiPackage, FiShoppingBag, FiArrowRight, FiSmartphone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import QR from '../../assets/my-qr.jpeg'
 
 const OrderSuccess = ({ order, bankDetails }) => {
   const copyToClipboard = (text, label) => {
@@ -15,42 +16,17 @@ const OrderSuccess = ({ order, bankDetails }) => {
     <div className="min-h-screen bg-bg-secondary py-6 sm:py-8 lg:py-12 px-4">
       <div className="max-w-3xl mx-auto">
         
-        {/* Success Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="relative inline-block mb-6">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-primary-100 flex items-center justify-center mx-auto animate-pulse-green">
-              <FiCheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-primary" />
-            </div>
-            <div className="absolute -bottom-2 -right-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/40">
-              <FiPackage className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-3">
-            Order Placed Successfully!
-          </h1>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 rounded-full">
-            <span className="text-sm text-text-secondary">Order Number:</span>
-            <span className="font-bold text-primary tracking-wider">{order.orderNumber}</span>
-            <button 
-              onClick={() => copyToClipboard(order.orderNumber, 'Order number')}
-              className="p-1.5 hover:bg-primary-200 rounded-lg cursor-pointer transition-colors"
-            >
-              <FiCopy className="w-4 h-4 text-primary" />
-            </button>
-          </div>
-        </div>
-
-        {/* Payment Details Card */}
-        <div className="bg-white rounded-2xl border border-border-light shadow-sm overflow-hidden mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        {/* Payment Details Card - Only payment info, no duplicate success message */}
+        <div className="bg-white rounded-2xl border border-border-light shadow-sm overflow-hidden mb-6 animate-fade-in">
           {/* Card Header */}
           <div className="p-5 sm:p-6 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-border-green/30">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-                <FiCreditCard className="w-6 h-6 text-white" />
+                <FiSmartphone className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-text-primary">Complete Your Payment</h2>
-                <p className="text-sm text-text-light">Transfer the amount using details below</p>
+                <p className="text-sm text-text-light">Scan QR code or use UPI to pay</p>
               </div>
             </div>
             <div className="mt-4 p-4 bg-white rounded-xl border-2 border-primary border-dashed">
@@ -64,56 +40,27 @@ const OrderSuccess = ({ order, bankDetails }) => {
           </div>
 
           <div className="p-5 sm:p-6 space-y-6">
-            {/* Bank Transfer Section */}
-            <div className="p-4 sm:p-5 bg-bg-secondary rounded-xl border border-border-light">
-              <div className="flex items-center gap-2 mb-4">
+            {/* QR Code Section */}
+            <div className="p-4 sm:p-5 bg-bg-secondary rounded-xl border border-border-light text-center">
+              <div className="flex items-center gap-2 mb-4 justify-center">
                 <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center">
-                  <FiCreditCard className="w-4 h-4 text-primary" />
+                  <FiSmartphone className="w-4 h-4 text-primary" />
                 </div>
-                <h3 className="font-bold text-text-primary">Bank Transfer</h3>
+                <h3 className="font-bold text-text-primary">Scan QR Code to Pay</h3>
               </div>
               
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <div>
-                    <p className="text-xs text-text-light">Bank Name</p>
-                    <p className="font-semibold text-text-primary">{bankDetails.bankName}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg group">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-text-light">Account Number</p>
-                    <p className="font-semibold text-text-primary font-mono tracking-wider">{bankDetails.accountNumber}</p>
-                  </div>
-                  <button 
-                    onClick={() => copyToClipboard(bankDetails.accountNumber, 'Account number')}
-                    className="p-2.5 rounded-lg bg-primary-50 text-primary hover:bg-primary hover:text-white cursor-pointer transition-all duration-300"
-                  >
-                    <FiCopy className="w-4 h-4" />
-                  </button>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg group">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-text-light">IFSC Code</p>
-                    <p className="font-semibold text-text-primary font-mono tracking-wider">{bankDetails.ifsc}</p>
-                  </div>
-                  <button 
-                    onClick={() => copyToClipboard(bankDetails.ifsc, 'IFSC code')}
-                    className="p-2.5 rounded-lg bg-primary-50 text-primary hover:bg-primary hover:text-white cursor-pointer transition-all duration-300"
-                  >
-                    <FiCopy className="w-4 h-4" />
-                  </button>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <div>
-                    <p className="text-xs text-text-light">Account Holder</p>
-                    <p className="font-semibold text-text-primary">{bankDetails.accountHolder}</p>
-                  </div>
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-white rounded-2xl shadow-md inline-block">
+                  {/* QR Code Image - Replace with your actual QR code image URL */}
+                  <img 
+                    src={QR} 
+                    alt="UPI QR Code" 
+                    className="w-48 h-48 sm:w-56 sm:h-56"
+                  />
+                  {/* Or use a QR code generation library like qrcode.react */}
                 </div>
               </div>
+              <p className="text-sm text-text-secondary">Scan this QR code with any UPI app (Google Pay, PhonePe, Paytm)</p>
             </div>
 
             {/* UPI Section */}
@@ -125,17 +72,54 @@ const OrderSuccess = ({ order, bankDetails }) => {
                 <h3 className="font-bold text-text-primary">UPI Payment</h3>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg group">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-text-light">UPI ID</p>
-                  <p className="font-semibold text-text-primary font-mono">{bankDetails.upi}</p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg group">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-text-light">UPI ID</p>
+                    <p className="font-semibold text-text-primary font-mono">6388870150@ptyes</p>
+                  </div>
+                  <button 
+                    onClick={() => copyToClipboard('6388870150@ptyes', 'UPI ID')}
+                    className="p-2.5 rounded-lg bg-primary-50 text-primary hover:bg-primary hover:text-white cursor-pointer transition-all duration-300"
+                  >
+                    <FiCopy className="w-4 h-4" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => copyToClipboard(bankDetails.upi, 'UPI ID')}
-                  className="p-2.5 rounded-lg bg-primary-50 text-primary hover:bg-primary hover:text-white cursor-pointer transition-all duration-300"
+
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg group">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-text-light">Mobile Number (Google Pay / PhonePe / Paytm)</p>
+                    <p className="font-semibold text-text-primary font-mono text-lg">6388870150</p>
+                  </div>
+                  <button 
+                    onClick={() => copyToClipboard('6388870150', 'Mobile number')}
+                    className="p-2.5 rounded-lg bg-primary-50 text-primary hover:bg-primary hover:text-white cursor-pointer transition-all duration-300"
+                  >
+                    <FiCopy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Payment Apps Buttons */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <a 
+                  href="tez://pay?pa=6388870150@ptyes&pn=Store&am=0" 
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
                 >
-                  <FiCopy className="w-4 h-4" />
-                </button>
+                  <span>📱</span> GPay
+                </a>
+                <a 
+                  href="phonepe://pay?pa=6388870150@ptyes&pn=Store&am=0" 
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors"
+                >
+                  <span>📱</span> PhonePe
+                </a>
+                <a 
+                  href="paytmmp://pay?pa=6388870150@ptyes&pn=Store&am=0" 
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  <span>📱</span> Paytm
+                </a>
               </div>
             </div>
 
@@ -147,16 +131,16 @@ const OrderSuccess = ({ order, bankDetails }) => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-text-secondary mb-2">
-                    After payment, please send the payment proof via WhatsApp to:
+                    After payment, please send the payment screenshot via WhatsApp to:
                   </p>
                   <a 
-                    href={`https://wa.me/${bankDetails.whatsapp?.replace('+', '')}`} 
+                    href="https://wa.me/917081434589" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-3 bg-green-500 text-white font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:bg-green-600 hover:shadow-lg hover:shadow-green-500/30 active:scale-95"
                   >
                     <FaWhatsapp className="w-5 h-5" />
-                    {bankDetails.whatsapp}
+                    7081434589
                     <FiExternalLink className="w-4 h-4" />
                   </a>
                 </div>
@@ -166,7 +150,7 @@ const OrderSuccess = ({ order, bankDetails }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 animate-fade-in">
           <Link 
             to={`/order/${order._id}`}
             className="flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30 active:scale-95 group"
@@ -194,10 +178,10 @@ const OrderSuccess = ({ order, bankDetails }) => {
         </div>
 
         {/* Note */}
-        <div className="mt-6 p-4 bg-primary-50 rounded-xl border border-primary-200 text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="mt-6 p-4 bg-primary-50 rounded-xl border border-primary-200 text-center animate-fade-in">
           <p className="text-sm text-primary-dark">
             <strong>Note:</strong> Your order will be processed within 24 hours after payment verification.
-            You will receive a confirmation email with tracking details once shipped.
+            Please send payment screenshot on WhatsApp after completing the payment.
           </p>
         </div>
       </div>

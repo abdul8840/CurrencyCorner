@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Counter } from './Counter.js';
 
 const orderItemSchema = new mongoose.Schema({
   product: {
@@ -122,13 +123,19 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.pre('save', async function () {
   if (this.isNew && !this.orderNumber) {
-    const prefix = 'CC';
-    const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const objectIdPart = this._id.toString().slice(-6).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    this.orderNumber = `${prefix}${datePart}${objectIdPart}${randomPart}`;
+
+    const year = new Date().getFullYear().toString().slice(-2);
+
+    const counter = await Counter.findOneAndUpdate(
+      { key: `order_${year}` },
+      { $inc: { seq: 291 } },
+      { new: true, upsert: true }
+    );
+
+    const sequence = String(counter.seq).padStart(5, '0');
+
+    this.orderNumber = `ORD${year}${sequence}`;
   }
-  // next();
 });
 
 orderSchema.index({ user: 1, createdAt: -1 });

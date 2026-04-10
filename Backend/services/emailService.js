@@ -25,6 +25,10 @@ class EmailService {
     this.brandColor = '#10b981'; // Emerald Green
     this.accentColor = '#1f2937'; // Dark Gray
     this.lightBg = '#f0fdf4'; // Light Green
+    // Store payment details from environment variables
+    this.upiId = process.env.STORE_UPI || '6388870150@ptyes';
+    this.phoneNumber = process.env.STORE_PHONE || '6388870150';
+    this.whatsappNumber = process.env.STORE_WHATSAPP || '7081434589';
   }
 
   async sendEmail({ to, subject, html, attachment = [] }) {
@@ -253,6 +257,40 @@ class EmailService {
           .text-muted { color: #6b7280; }
           .mt-20 { margin-top: 20px; }
           .mb-20 { margin-bottom: 20px; }
+          .payment-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+          }
+          .payment-card:hover {
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+          }
+          .payment-label {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+          }
+          .payment-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            font-family: monospace;
+            letter-spacing: 1px;
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 8px;
+          }
           @media only screen and (max-width: 600px) {
             .email-header { padding: 30px 20px; }
             .email-header h1 { font-size: 24px; }
@@ -357,11 +395,11 @@ class EmailService {
       .map(
         (item) =>
           `<tr>
-            <td><strong>${item.name}</strong></td>
+             <td><strong>${item.name}</strong></td>
             <td style="text-align: center;">${item.quantity}</td>
             <td style="text-align: right;">Rs. ${item.price}</td>
             <td style="text-align: right;"><strong>Rs. ${item.price * item.quantity}</strong></td>
-          </tr>`
+           </tr>`
       )
       .join('');
 
@@ -437,24 +475,35 @@ class EmailService {
         </div>
 
         <div class="highlight-box">
-          <h3>💳 Payment Required</h3>
-          <p style="margin: 10px 0;">Please complete the payment using one of the methods below:</p>
+          <h3>💳 Complete Your Payment</h3>
+          <p style="margin: 10px 0;">Please complete the payment using UPI or Mobile number:</p>
           
-          <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #10b981;">
-            <strong style="display: block; margin-bottom: 8px;">🏦 Bank Transfer</strong>
-            <p style="margin: 5px 0; font-size: 14px;"><strong>Bank:</strong> ${process.env.STORE_BANK_NAME}</p>
-            <p style="margin: 5px 0; font-size: 14px;"><strong>Account:</strong> ${process.env.STORE_ACCOUNT_NUMBER}</p>
-            <p style="margin: 5px 0; font-size: 14px;"><strong>IFSC:</strong> ${process.env.STORE_IFSC}</p>
+          <!-- UPI Payment Section -->
+          <div class="payment-card">
+            <div class="payment-label">📱 UPI ID</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <code class="payment-value" style="font-size: 18px;">${this.upiId}</code>
+              <span style="background: #f3f4f6; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #6b7280;">Copy to pay</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 13px; color: #6b7280;">Use this UPI ID in any UPI app (Google Pay, PhonePe, Paytm)</p>
           </div>
 
-          <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #10b981;">
-            <strong style="display: block; margin-bottom: 8px;">📱 UPI Payment</strong>
-            <p style="margin: 5px 0; font-size: 14px;"><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${process.env.STORE_UPI}</code></p>
+          <!-- Mobile Number Section -->
+          <div class="payment-card">
+            <div class="payment-label">📞 Mobile Number</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <span class="payment-value" style="font-size: 18px;">${this.phoneNumber}</span>
+              <span style="background: #f3f4f6; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #6b7280;">GPay | PhonePe | Paytm</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 13px; color: #6b7280;">Send payment directly to this number using any UPI app</p>
           </div>
 
-          <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #10b981; color: #059669; font-weight: 600;">
-            ✓ After payment, please share proof via WhatsApp to: <strong>${process.env.STORE_WHATSAPP}</strong>
-          </p>
+          <div style="margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #25D366;">
+            <p style="margin: 0; font-size: 14px;">
+              <strong>✅ After payment:</strong> Please share the payment screenshot on WhatsApp to: 
+              <strong style="color: #25D366;">${this.whatsappNumber}</strong>
+            </p>
+          </div>
         </div>
 
         <div class="btn-group">
@@ -465,13 +514,13 @@ class EmailService {
         <hr class="divider">
 
         <p style="color: #6b7280; font-size: 14px;">
-          Questions? Reach out to us on WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong> or Email: <strong>${process.env.STORE_EMAIL}</strong>
+          Questions? Reach out to us on WhatsApp: <strong>${this.whatsappNumber}</strong> or Email: <strong>${process.env.STORE_EMAIL}</strong>
         </p>
       </div>
 
       <div class="email-footer">
         <p>© 2024 AR Hobby. All rights reserved.</p>
-        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
+        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS || ''}</p>
       </div>
     `;
 
@@ -571,7 +620,7 @@ class EmailService {
         </div>
 
         <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-          Questions? Contact us on WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong>
+          Questions? Contact us on WhatsApp: <strong>${this.whatsappNumber}</strong>
         </p>
       </div>
 
@@ -614,7 +663,7 @@ class EmailService {
           </div>
           <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 20px; border-radius: 8px; border-left: 3px solid #f59e0b;">
             <h3 style="color: #d97706; margin-bottom: 10px;">📱 Need Help?</h3>
-            <p style="margin: 0; font-size: 14px;">WhatsApp: <strong>${process.env.STORE_WHATSAPP}</strong></p>
+            <p style="margin: 0; font-size: 14px;">WhatsApp: <strong>${this.whatsappNumber}</strong></p>
           </div>
         </div>
 
@@ -630,7 +679,7 @@ class EmailService {
 
       <div class="email-footer">
         <p>© 2024 AR Hobby. All rights reserved.</p>
-        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS}</p>
+        <p style="margin-top: 10px; font-size: 12px;">${process.env.STORE_ADDRESS || ''}</p>
       </div>
     `;
 
