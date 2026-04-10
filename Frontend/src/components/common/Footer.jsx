@@ -70,7 +70,7 @@ const Footer = () => {
               {[
                 { to: '/profile', label: 'Profile' },
                 { to: '/orders', label: 'My Orders' },
-                { to: '/addresses', label: 'Addresses' },
+                { to: '/terms-and-conditions', label: 'Terms & Conditions' },
                 { to: '/contact', label: 'Contact' },
               ].map((link) => (
                 <Link

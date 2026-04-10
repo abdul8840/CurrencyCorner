@@ -802,11 +802,7 @@ class EmailService {
       </div>
 
       <div class="email-footer">
-        <p>You received this because you subscribed to our newsletter.</p>
-        <p style="margin: 10px 0;">
-          <a href="${unsubscribeLink}">Unsubscribe</a> | 
-          <a href="${preferencesLink}">Preferences</a>
-        </p>
+        <p>Visit our website for more products!</p>
         <p style="margin: 10px 0 0 0;">&copy; ${new Date().getFullYear()} AR Hobby. All rights reserved.</p>
       </div>
     `;

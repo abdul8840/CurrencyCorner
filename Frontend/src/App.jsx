@@ -31,6 +31,7 @@ import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NewArrivals from './components/home/NewArrivals';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 function App() {
   const dispatch = useDispatch();
@@ -77,6 +78,7 @@ function App() {
           <Route path="/product/:slug" element={<ProductDetailPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
