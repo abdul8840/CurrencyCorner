@@ -15,6 +15,7 @@ import couponRoutes from './routes/couponRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import adminCartRoutes from './routes/admin/cartRoutes.js';
 import campaignRoutes from './routes/campaignRoutes.js';
 import subscriberRoutes from './routes/subscriberRoutes.js';
 
@@ -49,6 +50,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/carts', adminCartRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 
