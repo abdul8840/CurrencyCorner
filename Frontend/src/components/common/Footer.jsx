@@ -8,11 +8,21 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 py-12 sm:py-16">
-          {/* Brand Section */}
+          {/* Brand Section with Logo */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <h2 className="text-2xl sm:text-3xl font-bold text-primary-light mb-4 tracking-tight">
-              AR Hobby
-            </h2>
+            {/* Logo and Brand */}
+            <div className="flex items-center gap-3 mb-4">
+              {/* Logo Circle */}
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-primary-dark rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xl">AR</span>
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary-light tracking-tight">
+                  AR Hobby
+                </h2>
+              </div>
+            </div>
+            
             <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-xs">
               Your trusted destination for collectible currencies, coins, and numismatic
               treasures from around the world.
@@ -27,22 +37,6 @@ const Footer = () => {
               <p className="text-xs text-gray-400">
                 All orders shipped via India Post with tracking number
               </p>
-            </div>
-
-            {/* Social icons placeholder */}
-            <div className="flex gap-3 mt-6">
-              {['facebook', 'twitter', 'instagram'].map((social) => (
-                <div
-                  key={social}
-                  className="w-10 h-10 rounded-full bg-secondary-light border border-gray-700 
-                             flex items-center justify-center cursor-pointer 
-                             hover:bg-primary hover:border-primary transition-all duration-300"
-                >
-                  <span className="text-xs uppercase text-gray-400 hover:text-white">
-                    {social[0].toUpperCase()}
-                  </span>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -170,9 +164,15 @@ const Footer = () => {
         {/* Bottom Bar with India Post Highlight */}
         <div className="border-t border-gray-700/60 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-center text-gray-500 text-xs sm:text-sm">
-              &copy; {new Date().getFullYear()} AR Hobby. All rights reserved.
-            </p>
+            <div className="flex items-center gap-2">
+              {/* Small Logo in Bottom Bar */}
+              <div className="w-6 h-6 bg-gradient-to-r from-primary to-primary-dark rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">AR</span>
+              </div>
+              <p className="text-center text-gray-500 text-xs sm:text-sm">
+                &copy; {new Date().getFullYear()} AR Hobby. All rights reserved.
+              </p>
+            </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
                 <FiTruck className="text-primary-light text-sm" />

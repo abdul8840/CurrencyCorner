@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
@@ -20,6 +20,9 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [profileDropdown, setProfileDropdown] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
@@ -30,6 +33,7 @@ const Header = () => {
     if (searchQuery.trim()) {
       navigate(`/shop?keyword=${searchQuery}`);
       setSearchQuery('');
+      setSearchOpen(false);
       setMenuOpen(false);
     }
   };
@@ -42,6 +46,25 @@ const Header = () => {
   };
 
   const cartItemCount = cart?.totalItems || 0;
+
+  // Handle click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false);
+        setSearchQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Focus input when search opens
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
   return (
     <>
@@ -56,7 +79,7 @@ const Header = () => {
               {/* Free Delivery Message */}
               <div className="flex items-center gap-2">
                 <FiTruck className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="font-medium text-center sm:text-left text-white!">
+                <span className="font-medium text-center sm:text-left">
                   Free delivery on orders above ₹1000!
                 </span>
               </div>
@@ -82,35 +105,68 @@ const Header = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16 sm:h-18 lg:h-20">
               {/* Logo */}
-              <Link to="/" className="flex-shrink-0 cursor-pointer group">
+              <Link to="/" className="flex-shrink-0 cursor-pointer group flex items-center gap-2">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">AR</span>
+                </div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-primary tracking-tight group-hover:text-primary-dark transition-colors duration-300">
-                  AR<span className="text-secondary">Hobby</span>
+                  <span className="text-secondary">Hobby</span>
                 </h1>
               </Link>
 
-              {/* Desktop Search */}
-              <form
-                onSubmit={handleSearch}
-                className="hidden md:flex items-center flex-1 max-w-md mx-6 lg:mx-10"
-              >
-                <div className="relative w-full">
-                  <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-light text-lg" />
-                  <input
-                    type="text"
-                    placeholder="Search collectibles..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-11 pr-4 py-2.5 rounded-full border-2 border-border-light 
-                             bg-bg-secondary text-text-primary text-sm
-                             placeholder:text-text-light
-                             focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-200
+              {/* Desktop Navigation Menu */}
+              <nav className="hidden lg:flex items-center gap-1 ml-6">
+                {[
+                  { to: '/', label: 'Home' },
+                  { to: '/shop', label: 'Shop' },
+                  { to: '/about', label: 'About' },
+                  { to: '/contact', label: 'Contact' },
+                ].map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary 
+                             hover:text-primary hover:bg-primary-50 cursor-pointer 
                              transition-all duration-300"
-                  />
-                </div>
-              </form>
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
 
               {/* Right Actions */}
               <div className="flex items-center gap-2 sm:gap-3">
+                {/* Collapsible Search Bar */}
+                <div ref={searchRef} className="relative">
+                  {searchOpen ? (
+                    <form onSubmit={handleSearch} className="absolute right-0 top-1/2 -translate-y-1/2 z-50">
+                      <div className="relative">
+                        <input
+                          ref={searchInputRef}
+                          type="text"
+                          placeholder="Search collectibles..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-64 sm:w-80 pl-10 pr-4 py-2 rounded-full border-2 border-primary 
+                                   bg-white text-text-primary text-sm
+                                   placeholder:text-text-light
+                                   focus:outline-none focus:ring-2 focus:ring-primary-200
+                                   transition-all duration-300 shadow-lg"
+                        />
+                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-primary text-lg" />
+                      </div>
+                    </form>
+                  ) : (
+                    <button
+                      onClick={() => setSearchOpen(true)}
+                      className="p-2.5 rounded-full hover:bg-primary-50 cursor-pointer 
+                               transition-all duration-300 group"
+                    >
+                      <FiSearch className="text-xl sm:text-2xl text-text-secondary group-hover:text-primary transition-colors" />
+                    </button>
+                  )}
+                </div>
+
                 {/* Cart */}
                 <Link
                   to="/cart"
@@ -266,34 +322,15 @@ const Header = () => {
         {menuOpen && (
           <div
             className="lg:hidden bg-bg-primary border-t border-border-light shadow-xl 
-                        animate-[slideDown_0.3s_ease-in-out]"
+                        animate-[slideDown_0.3s_ease-in-out] max-h-[80vh] overflow-y-auto"
           >
             <div className="max-w-7xl mx-auto px-4 py-4 space-y-2">
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="mb-4 md:hidden">
-                <div className="relative">
-                  <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-light" />
-                  <input
-                    type="text"
-                    placeholder="Search collectibles..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-border-light 
-                             bg-bg-secondary text-text-primary text-sm
-                             placeholder:text-text-light
-                             focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-200
-                             transition-all duration-300"
-                  />
-                </div>
-              </form>
-
               {/* Navigation Links */}
               {[
                 { to: '/', label: 'Home' },
                 { to: '/shop', label: 'Shop' },
                 { to: '/about', label: 'About' },
                 { to: '/contact', label: 'Contact' },
-                { to: '/terms', label: 'Terms & Conditions' },
               ].map((link) => (
                 <Link
                   key={link.to}

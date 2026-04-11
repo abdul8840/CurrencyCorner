@@ -1,5 +1,6 @@
 // OrderTerms.jsx
 import { FiFileText, FiCheck, FiAlertCircle, FiTruck, FiCreditCard, FiPackage, FiRefreshCw, FiGift } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 const OrderTerms = ({ accepted, onAcceptChange }) => {
   const terms = [
@@ -46,6 +47,9 @@ const OrderTerms = ({ accepted, onAcceptChange }) => {
         </div>
         <div>
           <h3 className="text-base sm:text-lg font-bold text-text-primary">Terms & Conditions</h3>
+          <Link to="/terms-and-conditions" className="underline text-green-500 hover:text-green-600">
+            View Full Terms
+          </Link>
           <p className="text-xs sm:text-sm text-text-light">Please read carefully before placing order</p>
         </div>
       </div>

@@ -121,20 +121,14 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-orderSchema.pre('save', async function () {
+orderSchema.pre('save', function () {
   if (this.isNew && !this.orderNumber) {
 
     const year = new Date().getFullYear().toString().slice(-2);
 
-    const counter = await Counter.findOneAndUpdate(
-      { key: `order_${year}` },
-      { $inc: { seq: 291 } },
-      { new: true, upsert: true }
-    );
+    const random = Math.random().toString().slice(2, 7); // 5 digits
 
-    const sequence = String(counter.seq).padStart(5, '0');
-
-    this.orderNumber = `ORD${year}${sequence}`;
+    this.orderNumber = `ORD${year}${random}`;
   }
 });
 
