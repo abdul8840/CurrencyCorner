@@ -23,6 +23,7 @@ import AdminCampaignsPage from './pages/AdminCampaignsPage';
 import AdminCreateCampaignPage from './pages/AdminCreateCampaignPage';
 import AdminCampaignDetailPage from './pages/AdminCampaignDetailPage';
 import AdminSubscribersPage from './pages/AdminSubscribersPage';
+import Carts from './pages/Carts';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -92,6 +93,8 @@ function App() {
         <Route path="categories" element={<CategoriesPage />} />
         <Route path="categories/add" element={<AddCategoryPage />} />
         <Route path="categories/edit/:id" element={<EditCategoryPage />} />
+
+        <Route path="carts" element={<Carts />} />
         
         {/* Orders */}
         <Route path="orders" element={<OrdersPage />} />
