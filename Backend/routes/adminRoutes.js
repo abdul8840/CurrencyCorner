@@ -1,10 +1,15 @@
+// routes/adminRoutes.js
+
 import express from 'express';
 import { getDashboardStats } from '../controllers/adminController.js';
-import { protect } from '../middleware/auth.js';
-import { admin } from '../middleware/admin.js';
+
+// ✅ NEW AUTH
+import { protectAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/dashboard', protect, admin, getDashboardStats);
+// ==================== ADMIN ====================
+
+router.get('/dashboard', protectAdmin, getDashboardStats);
 
 export default router;

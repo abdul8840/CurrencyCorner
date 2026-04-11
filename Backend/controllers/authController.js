@@ -81,7 +81,7 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, 200, res, 'user');
   } catch (error) {
     console.error('❌ Login error:', error.message);
     res.status(500).json({ success: false, message: error.message });
@@ -127,7 +127,7 @@ export const adminLogin = async (req, res) => {
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, 200, res, 'admin');
   } catch (error) {
     console.error('❌ Admin login error:', error.message);
     res.status(500).json({ success: false, message: error.message });
@@ -135,22 +135,13 @@ export const adminLogin = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  try {
-    res.cookie('token', '', {
-      httpOnly: true,
-      expires: new Date(0),
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    });
+  res.cookie('userToken', '', { expires: new Date(0) });
+  res.cookie('adminToken', '', { expires: new Date(0) });
 
-    res.status(200).json({ 
-      success: true, 
-      message: 'Logged out successfully' 
-    });
-  } catch (error) {
-    console.error('❌ Logout error:', error.message);
-    res.status(500).json({ success: false, message: error.message });
-  }
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully'
+  });
 };
 
 export const getMe = async (req, res) => {

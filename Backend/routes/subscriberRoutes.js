@@ -1,3 +1,5 @@
+// routes/subscriberRoutes.js
+
 import express from 'express';
 import {
   subscribe,
@@ -10,23 +12,48 @@ import {
   exportSubscribers,
   getSubscriberStats
 } from '../controllers/subscriberController.js';
-import { protect } from '../middleware/auth.js';
-import { isAdmin } from '../middleware/auth.js';
+
+// ✅ NEW AUTH MIDDLEWARE
+import { protectUser, protectAdmin } from '../middleware/auth.js';
+
 import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
 // ==================== PUBLIC ROUTES ====================
+
+// Subscribe
 router.post('/subscribe', subscribe);
+
+// Unsubscribe
 router.post('/unsubscribe', unsubscribe);
-router.put('/preferences', updatePreferences);
+
+// Update preferences (user must be logged in)
+router.put('/preferences', protectUser, updatePreferences);
 
 // ==================== ADMIN ROUTES ====================
-router.get('/', protect, isAdmin, getAllSubscribers);
-router.post('/', protect, isAdmin, addSingleSubscriber);
-router.post('/import', protect, isAdmin, upload.single('file'), bulkImportSubscribers);
-router.delete('/:id', protect, isAdmin, deleteSubscriber);
-router.get('/export/csv', protect, isAdmin, exportSubscribers);
-router.get('/stats', protect, isAdmin, getSubscriberStats);
+
+// Get all subscribers
+router.get('/', protectAdmin, getAllSubscribers);
+
+// Add single subscriber
+router.post('/', protectAdmin, addSingleSubscriber);
+
+// Bulk import (CSV)
+router.post(
+  '/import',
+  protectAdmin,
+  upload.single('file'),
+  bulkImportSubscribers
+);
+
+// Delete subscriber
+router.delete('/:id', protectAdmin, deleteSubscriber);
+
+// Export CSV
+router.get('/export/csv', protectAdmin, exportSubscribers);
+
+// Stats
+router.get('/stats', protectAdmin, getSubscriberStats);
 
 export default router;

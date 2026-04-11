@@ -1,77 +1,93 @@
-// middleware/auth.js
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-export const protect = async (req, res, next) => {
-  let token;
+// ==================== HELPER FUNCTION ====================
 
-  // Get token from cookies or Authorization header
-  if (req.cookies.token) {
-    token = req.cookies.token;
-  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+const verifyTokenAndGetUser = async (token) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.id);
+  return { decoded, user };
+};
 
-  // Check if token exists
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Not authorized, please login'
-    });
-  }
+// ==================== USER AUTH MIDDLEWARE ====================
 
+export const protectUser = async (req, res, next) => {
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = req.cookies.userToken;
 
-    // Find user by ID
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
+    if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: 'User not authorized. Please login.'
       });
     }
 
-    // Check if account is active
-    if (!user.isActive) {
+    const { user } = await verifyTokenAndGetUser(token);
+
+    if (!user || user.role !== 'user' || !user.isActive) {
       return res.status(401).json({
         success: false,
-        message: 'Account has been deactivated'
+        message: 'Invalid or inactive user account'
       });
     }
 
-    // Attach user to request
     req.user = user;
     next();
-  } catch (error) {
-    console.error('❌ Auth error:', error.message);
 
-    // Handle different JWT errors
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Token has expired, please login again'
-      });
-    } else if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token'
-      });
-    } else {
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized, authentication failed'
-      });
-    }
+  } catch (error) {
+    console.error('❌ User auth error:', error.message);
+
+    return res.status(401).json({
+      success: false,
+      message: error.name === 'TokenExpiredError'
+        ? 'Session expired. Please login again.'
+        : 'Invalid user token'
+    });
   }
 };
 
-// ==================== ROLE-BASED MIDDLEWARE ====================
+// ==================== ADMIN AUTH MIDDLEWARE ====================
+
+export const protectAdmin = async (req, res, next) => {
+  try {
+    const token = req.cookies.adminToken;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin not authorized. Please login.'
+      });
+    }
+
+    const { user } = await verifyTokenAndGetUser(token);
+
+    if (!user || user.role !== 'admin' || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or inactive admin account'
+      });
+    }
+
+    req.user = user;
+    next();
+
+  } catch (error) {
+    console.error('❌ Admin auth error:', error.message);
+
+    return res.status(401).json({
+      success: false,
+      message: error.name === 'TokenExpiredError'
+        ? 'Session expired. Please login again.'
+        : 'Invalid admin token'
+    });
+  }
+};
+
+// ==================== ROLE-BASED AUTHORIZATION ====================
 
 export const authorize = (...roles) => {
   return (req, res, next) => {
+
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -82,7 +98,7 @@ export const authorize = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Not authorized to access this resource. Required role: ${roles.join(', ')}`
+        message: `Access denied. Required role: ${roles.join(', ')}`
       });
     }
 
@@ -90,7 +106,7 @@ export const authorize = (...roles) => {
   };
 };
 
-// ==================== ADMIN-ONLY MIDDLEWARE ====================
+// ==================== ADMIN ONLY ====================
 
 export const isAdmin = (req, res, next) => {
   if (!req.user) {
@@ -103,69 +119,71 @@ export const isAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({
       success: false,
-      message: 'Only administrators can access this resource'
+      message: 'Admin access only'
     });
   }
 
   next();
 };
 
-// ==================== OPTIONAL AUTH MIDDLEWARE ====================
+// ==================== OPTIONAL AUTH ====================
 
 export const optionalAuth = async (req, res, next) => {
-  let token;
+  try {
+    const token = req.cookies.userToken || req.cookies.adminToken;
 
-  if (req.cookies.token) {
-    token = req.cookies.token;
-  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+    if (!token) {
+      req.isAuthenticated = false;
+      return next();
+    }
 
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id);
+    const { user } = await verifyTokenAndGetUser(token);
 
-      if (user && user.isActive) {
-        req.user = user;
-        req.isAuthenticated = true;
-      }
-    } catch (error) {
-      console.error('❌ Optional auth error:', error.message);
+    if (user && user.isActive) {
+      req.user = user;
+      req.isAuthenticated = true;
+    } else {
       req.isAuthenticated = false;
     }
-  } else {
+
+  } catch (error) {
+    console.error('❌ Optional auth error:', error.message);
     req.isAuthenticated = false;
   }
 
   next();
 };
 
-// ==================== OWNERSHIP VERIFICATION ====================
+// ==================== OWNERSHIP CHECK ====================
 
-export const checkOwnership = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+export const checkOwnership = (paramId = 'id') => {
+  return (req, res, next) => {
+    try {
+      const resourceId = req.params[paramId];
 
-    // Check if the resource belongs to the user or if user is admin
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
-      return res.status(403).json({
+      if (
+        req.user._id.toString() !== resourceId &&
+        req.user.role !== 'admin'
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: 'You do not have permission to access this resource'
+        });
+      }
+
+      next();
+
+    } catch (error) {
+      console.error('❌ Ownership error:', error.message);
+      res.status(500).json({
         success: false,
-        message: 'You do not have permission to access this resource'
+        message: 'Ownership verification failed'
       });
     }
-
-    next();
-  } catch (error) {
-    console.error('❌ Ownership check error:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Error verifying resource ownership'
-    });
-  }
+  };
 };
 
-// ==================== RATE LIMITING MIDDLEWARE ====================
+// ==================== RATE LIMITING ====================
 
 const requestCounts = new Map();
 
@@ -179,20 +197,20 @@ export const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
     }
 
     const requests = requestCounts.get(key);
-    const recentRequests = requests.filter(time => now - time < windowMs);
+    const validRequests = requests.filter(time => now - time < windowMs);
 
-    if (recentRequests.length >= maxRequests) {
+    if (validRequests.length >= maxRequests) {
       return res.status(429).json({
         success: false,
-        message: `Too many requests. Please try again later.`,
-        retryAfter: Math.ceil((recentRequests[0] + windowMs - now) / 1000)
+        message: 'Too many requests. Try again later.',
+        retryAfter: Math.ceil((validRequests[0] + windowMs - now) / 1000)
       });
     }
 
-    recentRequests.push(now);
-    requestCounts.set(key, recentRequests);
+    validRequests.push(now);
+    requestCounts.set(key, validRequests);
 
-    // Clean up old entries
+    // Cleanup memory
     if (requestCounts.size > 10000) {
       requestCounts.clear();
     }
@@ -201,23 +219,21 @@ export const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
   };
 };
 
-// ==================== REQUEST LOGGING MIDDLEWARE ====================
+// ==================== REQUEST LOGGER ====================
 
 export const logRequest = (req, res, next) => {
-  const requestInfo = {
-    timestamp: new Date().toISOString(),
+  console.log('📝 Request:', {
+    time: new Date().toISOString(),
     method: req.method,
-    path: req.path,
+    path: req.originalUrl,
     ip: req.ip,
-    userId: req.user ? req.user._id : 'anonymous'
-  };
-
-  console.log('📝 Request:', requestInfo);
+    user: req.user ? req.user._id : 'anonymous'
+  });
 
   next();
 };
 
-// ==================== ERROR HANDLING MIDDLEWARE ====================
+// ==================== ASYNC HANDLER ====================
 
 export const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);

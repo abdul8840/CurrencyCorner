@@ -1,4 +1,5 @@
 // routes/authRoutes.js
+
 import express from 'express';
 import {
   register,
@@ -13,15 +14,17 @@ import {
   deactivateAccount,
   resendVerificationEmail
 } from '../controllers/authController.js';
+
+// ✅ UPDATED MIDDLEWARE IMPORTS
 import {
-  protect,
-  isAdmin,
-  authorize,
+  protectUser,
+  protectAdmin,
   optionalAuth,
   rateLimit,
   logRequest,
   asyncHandler
 } from '../middleware/auth.js';
+
 import {
   validateRegistration,
   validateLogin,
@@ -40,7 +43,7 @@ const router = express.Router();
 // User Registration
 router.post(
   '/register',
-  rateLimit(5, 60 * 60 * 1000), // 5 requests per hour
+  rateLimit(5, 60 * 60 * 1000),
   validateRegistration,
   asyncHandler(register)
 );
@@ -48,7 +51,7 @@ router.post(
 // User Login
 router.post(
   '/login',
-  rateLimit(10, 15 * 60 * 1000), // 10 requests per 15 minutes
+  rateLimit(10, 15 * 60 * 1000),
   validateLogin,
   asyncHandler(login)
 );
@@ -56,7 +59,7 @@ router.post(
 // Admin Login
 router.post(
   '/admin/login',
-  rateLimit(10, 15 * 60 * 1000), // 10 requests per 15 minutes
+  rateLimit(10, 15 * 60 * 1000),
   validateLogin,
   asyncHandler(adminLogin)
 );
@@ -64,7 +67,7 @@ router.post(
 // Forgot Password
 router.post(
   '/forgot-password',
-  rateLimit(3, 60 * 60 * 1000), // 3 requests per hour
+  rateLimit(3, 60 * 60 * 1000),
   validateForgotPassword,
   asyncHandler(forgotPassword)
 );
@@ -72,7 +75,7 @@ router.post(
 // Reset Password
 router.put(
   '/reset-password/:token',
-  rateLimit(5, 60 * 60 * 1000), // 5 requests per hour
+  rateLimit(5, 60 * 60 * 1000),
   validatePasswordReset,
   asyncHandler(resetPassword)
 );
@@ -80,33 +83,43 @@ router.put(
 // Resend Verification Email
 router.post(
   '/resend-verification',
-  rateLimit(3, 60 * 60 * 1000), // 3 requests per hour
+  rateLimit(3, 60 * 60 * 1000),
   validateResendVerification,
   asyncHandler(resendVerificationEmail)
 );
 
-// ==================== PROTECTED ROUTES ====================
+// ==================== USER PROTECTED ROUTES ====================
 
-// Logout (requires authentication)
-router.post('/logout', protect, logRequest, asyncHandler(logout));
+// Logout (User)
+router.post(
+  '/logout',
+  protectUser,
+  logRequest,
+  asyncHandler(logout)
+);
 
 // Get Current User
-router.get('/me', protect, logRequest, asyncHandler(getMe));
+router.get(
+  '/me',
+  protectUser,
+  logRequest,
+  asyncHandler(getMe)
+);
 
 // Change Password
 router.put(
   '/change-password',
-  protect,
+  protectUser,
   logRequest,
   validateChangePassword,
-  rateLimit(5, 60 * 60 * 1000), // 5 requests per hour
+  rateLimit(5, 60 * 60 * 1000),
   asyncHandler(changePassword)
 );
 
 // Update Profile
 router.put(
   '/update-profile',
-  protect,
+  protectUser,
   logRequest,
   validateUpdateProfile,
   asyncHandler(updateProfile)
@@ -115,10 +128,28 @@ router.put(
 // Deactivate Account
 router.put(
   '/deactivate-account',
-  protect,
+  protectUser,
   logRequest,
   validateDeactivateAccount,
   asyncHandler(deactivateAccount)
+);
+
+// ==================== ADMIN PROTECTED ROUTES ====================
+
+// Admin Logout (optional but recommended)
+router.post(
+  '/admin/logout',
+  protectAdmin,
+  logRequest,
+  asyncHandler(logout)
+);
+
+// Admin Self Info (optional)
+router.get(
+  '/admin/me',
+  protectAdmin,
+  logRequest,
+  asyncHandler(getMe)
 );
 
 export default router;

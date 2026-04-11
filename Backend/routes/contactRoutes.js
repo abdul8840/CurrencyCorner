@@ -1,13 +1,32 @@
+// routes/contactRoutes.js
+
 import express from 'express';
-import { submitContact, getAllContacts, updateContactStatus, deleteContact } from '../controllers/contactController.js';
-import { protect } from '../middleware/auth.js';
-import { admin } from '../middleware/admin.js';
+import {
+  submitContact,
+  getAllContacts,
+  updateContactStatus,
+  deleteContact
+} from '../controllers/contactController.js';
+
+// ✅ NEW AUTH
+import { protectAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// ==================== PUBLIC ====================
+
+// Submit contact form
 router.post('/', submitContact);
-router.get('/', protect, admin, getAllContacts);
-router.put('/:id', protect, admin, updateContactStatus);
-router.delete('/:id', protect, admin, deleteContact);
+
+// ==================== ADMIN ====================
+
+// Get all contacts
+router.get('/', protectAdmin, getAllContacts);
+
+// Update contact status
+router.put('/:id', protectAdmin, updateContactStatus);
+
+// Delete contact
+router.delete('/:id', protectAdmin, deleteContact);
 
 export default router;
