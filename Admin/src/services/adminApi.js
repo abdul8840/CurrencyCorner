@@ -62,6 +62,17 @@ export const categoryAPI = {
   delete: (id) => API.delete(`/categories/${id}`)
 };
 
+export const cartAPI = {
+  getAll: (params) => API.get('/admin/carts', { params }),
+  getAnalytics: () => API.get('/admin/carts/analytics'),
+  getCartByUser: (userId) => API.get(`/admin/carts/user/${userId}`),
+  removeItem: (userId, productId) => API.delete(`/admin/carts/user/${userId}/item/${productId}`),
+  updateItem: (userId, productId, quantity) => API.put(`/admin/carts/user/${userId}/item/${productId}`, { quantity }),
+  clearCart: (userId) => API.delete(`/admin/carts/user/${userId}/clear`),
+  deleteCart: (userId) => API.delete(`/admin/carts/user/${userId}`),
+  exportCarts: () => API.get('/admin/carts/export')
+};
+
 export const orderAPI = {
   getAll: (params) => API.get('/orders/admin/all', { params }),
   getById: (id) => API.get(`/orders/${id}`),

@@ -7,6 +7,7 @@ import adminOrderReducer from '../features/orders/adminOrderSlice';
 import adminCouponReducer from '../features/coupons/adminCouponSlice';
 import adminUserReducer from '../features/users/adminUserSlice';
 import adminContactReducer from '../features/contacts/adminContactSlice';
+import adminCartReducer from '../features/carts/adminCartSlice';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     adminOrder: adminOrderReducer,
     adminCoupon: adminCouponReducer,
     adminUser: adminUserReducer,
-    adminContact: adminContactReducer
+    adminContact: adminContactReducer,
+    adminCart: adminCartReducer
   }
 });

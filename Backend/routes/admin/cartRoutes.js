@@ -9,7 +9,8 @@ import {
   adminDeleteCart,
   exportCarts
 } from '../../controllers/admin/cartController.js';
-import { protect, admin } from '../../middleware/auth.js';
+import { protect } from '../../middleware/auth.js';
+import { admin } from '../../middleware/admin.js';
 
 const router = express.Router();
 
